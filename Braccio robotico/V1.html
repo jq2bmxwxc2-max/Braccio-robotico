@@ -1,0 +1,6663 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paio-robot - Controllo 6 Servo (v3)</title>
+
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+
+      --blue: #2563eb;
+      --blue-dark: #1d4ed8;
+
+      --green: #22c55e;
+      --green-dark: #16a34a;
+
+      --red: #ef4444;
+      --red-dark: #dc2626;
+
+      --yellow: #f59e0b;
+      --yellow-dark: #d97706;
+
+      --purple: #8b5cf6;
+      --purple-dark: #6d28d9;
+
+      --orange: #f97316;
+      --arduino: #00a7b5;
+
+      --dark: #111827;
+      --dark-box: #0f172a;
+
+      --shadow: 0 8px 22px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button,
+    input {
+      font-family: inherit;
+    }
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      height: 106px;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      width: 86px;
+      height: 86px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      padding: 0;
+    }
+
+    .brand-text {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 56px;
+      line-height: 0.95;
+      font-weight: 950;
+      letter-spacing: -0.065em;
+      color: #0f172a;
+      white-space: nowrap;
+    }
+
+    .brand h1 .brand-blue {
+      color: var(--blue);
+    }
+
+    .brand h1 .brand-black {
+      color: #0f172a;
+    }
+
+    .brand p {
+      display: none;
+    }
+
+    .product-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .info-button {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: var(--blue-dark);
+      font-size: 18px;
+      font-weight: 950;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      flex-shrink: 0;
+    }
+
+    .info-button:hover {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .contact-card {
+      margin-top: 14px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      background: #f8fafc;
+      display: grid;
+      gap: 10px;
+    }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .contact-row strong {
+      color: #0f172a;
+      font-weight: 900;
+    }
+
+    .contact-row a {
+      color: var(--blue-dark);
+      font-weight: 850;
+      text-decoration: none;
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
+
+    .contact-row a:hover {
+      text-decoration: underline;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      transition: 0.18s ease;
+    }
+
+    .connect-btn,
+    .mode-btn {
+      border: 1px solid var(--border);
+      background: white;
+      color: var(--text);
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .connect-btn:hover,
+    .mode-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .connect-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+      transform: none;
+    }
+
+    .btn-success {
+      border-color: rgba(34, 197, 94, 0.35);
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .btn-success:hover {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    .btn-warning {
+      border-color: rgba(245, 158, 11, 0.38);
+      background: #fffbeb;
+      color: #92400e;
+    }
+
+    .btn-warning:hover {
+      background: var(--yellow);
+      color: white;
+      border-color: var(--yellow);
+    }
+
+    .btn-purple {
+      border-color: rgba(139, 92, 246, 0.38);
+      background: #f5f3ff;
+      color: #5b21b6;
+    }
+
+    .btn-purple:hover {
+      background: var(--purple);
+      color: white;
+      border-color: var(--purple);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: var(--blue-dark);
+      border: 1px solid #bfdbfe;
+      font-weight: 700;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--blue);
+    }
+
+
+    .status-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 14px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      background: white;
+      white-space: nowrap;
+    }
+
+    .status-toggle:hover {
+      transform: translateY(-1px);
+    }
+
+    .status-toggle .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      flex-shrink: 0;
+    }
+
+    .status-toggle.status-simulation {
+      background: #fef2f2;
+      border-color: #fecaca;
+      color: #991b1b;
+    }
+
+    .status-toggle.status-simulation .status-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.12);
+    }
+
+    .status-toggle.status-real {
+      background: #dcfce7;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .status-toggle.status-real .status-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.14);
+    }
+
+    main {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 410px;
+      gap: 20px;
+      padding: 18px 28px;
+      overflow: hidden;
+    }
+
+    .cards-grid {
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+      overflow: hidden;
+    }
+
+    .servo-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px 18px 14px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-shrink: 0;
+    }
+
+    .servo-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 9px;
+      display: grid;
+      place-items: center;
+      background: var(--blue);
+      color: white;
+      font-size: 15px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .card-title h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .card-title p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .image-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 4px 0 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #ffffff, #f9fafb);
+    }
+
+    .servo-img {
+      width: 100%;
+      height: 100%;
+      max-height: 145px;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.25s ease;
+    }
+
+    .servo-card:hover .servo-img {
+      transform: scale(1.03);
+    }
+
+    .value-badge {
+      align-self: center;
+      background: var(--blue);
+      color: white;
+      font-weight: 800;
+      padding: 7px 15px;
+      border-radius: 10px;
+      min-width: 70px;
+      text-align: center;
+      margin-bottom: 8px;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+      flex-shrink: 0;
+    }
+
+    .slider,
+    .speed-slider {
+      width: 100%;
+      appearance: none;
+      height: 7px;
+      border-radius: 999px;
+      outline: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .slider {
+      margin: 5px 0 8px;
+      background: linear-gradient(to right, var(--blue) 0%, var(--blue) 50%, #e5e7eb 50%, #e5e7eb 100%);
+    }
+
+    .slider::-webkit-slider-thumb,
+    .speed-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--blue);
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.45);
+      cursor: pointer;
+    }
+
+    .slider::-moz-range-thumb,
+    .speed-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: var(--blue);
+      border: 3px solid white;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.45);
+      cursor: pointer;
+    }
+
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 5px;
+      flex-shrink: 0;
+    }
+
+    .angle-row {
+      display: grid;
+      grid-template-columns: 42px 1fr 42px;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .angle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .angle-btn {
+      border: 1px solid #bfdbfe;
+      background: #eff6ff;
+      color: var(--blue-dark);
+      border-radius: 10px;
+      padding: 7px 0;
+      font-size: 18px;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .angle-btn:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .control-panel {
+      height: 100%;
+      min-height: 0;
+      background: var(--dark);
+      color: #e5e7eb;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      border: 1px solid #0f172a;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-title {
+      font-size: 22px;
+      font-weight: 900;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+      letter-spacing: -0.02em;
+    }
+
+    .home-btn {
+      width: 100%;
+      border: none;
+      color: white;
+      padding: 13px 16px;
+      border-radius: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .home-btn.primary-action {
+      background: var(--blue);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+    }
+
+    .home-btn.primary-action:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+
+    .home-btn.save-action {
+      margin-top: 10px;
+      background: var(--green);
+      box-shadow: 0 8px 18px rgba(34, 197, 94, 0.22);
+    }
+
+    .home-btn.save-action:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+    }
+
+    .home-btn.sequence-action {
+      margin-top: 10px;
+      background: var(--purple);
+      box-shadow: 0 8px 18px rgba(139, 92, 246, 0.24);
+    }
+
+    .home-btn.sequence-action:hover {
+      background: var(--purple-dark);
+      transform: translateY(-1px);
+    }
+
+    .speed-control {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      flex-shrink: 0;
+    }
+
+    .speed-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #e5e7eb;
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .speed-header strong {
+      color: #93c5fd;
+    }
+
+    .speed-slider {
+      background: linear-gradient(to right, var(--blue) 0%, var(--blue) 50%, #374151 50%, #374151 100%);
+    }
+
+    .speed-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 8px;
+      color: #9ca3af;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .speed-delay {
+      margin-top: 8px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .mini-info {
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(37, 99, 235, 0.08);
+      border: 1px solid rgba(147, 197, 253, 0.18);
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.45;
+      flex-shrink: 0;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 10px;
+      flex-shrink: 0;
+    }
+
+    .sequence-log-card .log-header {
+      margin-top: 0;
+    }
+
+    .log-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #e5e7eb;
+    }
+
+    .clear-btn {
+      border: 1px solid rgba(239, 68, 68, 0.55);
+      background: rgba(239, 68, 68, 0.08);
+      color: #f87171;
+      padding: 7px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .clear-btn .trash-icon {
+      width: 15px;
+      height: 15px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .clear-btn:hover {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+    }
+
+    .log-box {
+      flex: 1;
+      min-height: 0;
+      background: var(--dark-box);
+      border: 1px solid rgba(148, 163, 184, 0.15);
+      border-radius: 15px;
+      padding: 13px;
+      overflow-y: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.65;
+    }
+
+    .log-entry {
+      display: grid;
+      grid-template-columns: 66px 1fr;
+      gap: 10px;
+      white-space: nowrap;
+    }
+
+    .log-time {
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .log-command {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .log-entry-tx .log-command {
+      color: #e5e7eb;
+    }
+
+    .log-entry-rx .log-command {
+      color: var(--arduino);
+    }
+
+    .log-entry-sys .log-command {
+      color: #fbbf24;
+    }
+
+    .log-footer {
+      margin-top: 10px;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+
+    .serial-log-card {
+      margin-top: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(255, 255, 255, 0.035);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .serial-log-card:hover {
+      border-color: rgba(147, 197, 253, 0.45);
+      background: rgba(37, 99, 235, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .serial-log-card .log-header {
+      margin: 0 0 10px;
+    }
+
+    .serial-log-preview {
+      flex: 1;
+      min-height: 140px;
+      height: auto;
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .serial-log-card .log-footer {
+      margin-top: 8px;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .sequence-log-card .serial-log-card {
+      margin-top: 0;
+      height: 100%;
+    }
+
+    .sequence-log-card .serial-log-preview {
+      min-height: 120px;
+    }
+
+
+    .log-modal-card {
+      width: min(900px, 92vw);
+      height: min(680px, 82vh);
+      background: var(--dark);
+      color: #e5e7eb;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.35);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .log-modal-card .log-header {
+      margin: 0 0 12px;
+    }
+
+    .log-modal-card .log-box {
+      flex: 1;
+      min-height: 0;
+    }
+
+    .log-modal-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .close-log-btn {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e5e7eb;
+      padding: 7px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .close-log-btn:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .sequence-page {
+      flex: 1;
+      min-height: 0;
+      padding: 18px 28px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr) 320px;
+      gap: 18px;
+      position: relative;
+    }
+
+    .sequence-back-btn {
+      position: absolute;
+      left: 28px;
+      top: 18px;
+      z-index: 30;
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(15, 23, 42, 0.92);
+      color: white;
+      font-size: 24px;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.25);
+    }
+
+    .sequence-back-btn:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .sequence-card {
+      min-height: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sequence-card.left-card {
+      padding-top: 72px;
+    }
+
+    .sequence-card h3 {
+      margin: 0 0 14px;
+      font-size: 17px;
+      font-weight: 800;
+    }
+
+    .sequence-help {
+      margin: -6px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .saved-positions,
+    .saved-sequences {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding-right: 6px;
+    }
+
+    .position-block {
+      border: none;
+      border-radius: 16px;
+      padding: 14px;
+      cursor: grab;
+      transition: 0.2s ease;
+      color: white;
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .position-block:hover {
+      transform: translateY(-2px);
+    }
+
+    .position-block.no-description .position-actions {
+      margin-top: 14px;
+    }
+
+    .position-block::before,
+    .flow-node::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.22), transparent 45%);
+      pointer-events: none;
+    }
+
+    .position-block strong,
+    .flow-node strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .position-values,
+    .flow-node-values {
+      color: rgba(255,255,255,0.84);
+      font-size: 12px;
+      line-height: 1.45;
+      position: relative;
+      z-index: 1;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .position-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .position-meta {
+      color: rgba(255,255,255,0.82);
+      font-size: 13px;
+      line-height: 1.35;
+      margin-top: 6px;
+      position: relative;
+      z-index: 1;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .position-edit-btn,
+    .position-run-btn,
+    .position-delete-btn {
+      border: none;
+      border-radius: 9px;
+      padding: 8px 10px;
+      font-weight: 900;
+      cursor: pointer;
+      color: white;
+    }
+
+    .position-edit-btn {
+      background: var(--blue);
+    }
+
+    .position-edit-btn:hover {
+      background: var(--blue-dark);
+    }
+
+    .position-run-btn {
+      background: var(--green);
+    }
+
+    .position-run-btn:hover {
+      background: var(--green-dark);
+    }
+
+    .position-delete-btn {
+      background: var(--red);
+    }
+
+    .position-delete-btn:hover {
+      background: var(--red-dark);
+    }
+
+    .position-small-btn {
+      border: none;
+      border-radius: 9px;
+      padding: 7px 9px;
+      font-weight: 800;
+      cursor: pointer;
+      background: rgba(255,255,255,0.18);
+      color: white;
+    }
+
+    .delete-position-btn {
+      background: rgba(239, 68, 68, 0.9);
+    }
+
+    .delete-position-btn:hover {
+      background: white;
+      color: var(--red-dark);
+    }
+
+    .block-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); }
+    .block-green { background: linear-gradient(135deg, #10b981, #047857); }
+    .block-orange { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .block-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+    .block-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .block-cyan { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+
+    .flow-card {
+      padding: 0;
+      background: #111827;
+      color: #e5e7eb;
+      position: relative;
+    }
+
+    .flow-toolbar {
+      min-height: 84px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.88);
+      z-index: 5;
+    }
+
+    .flow-meta {
+      min-width: 300px;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sequence-badge-preview {
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: var(--blue);
+      color: white;
+      font-size: 22px;
+      font-weight: 900;
+      box-shadow: 0 10px 22px rgba(37, 99, 235, 0.25);
+    }
+
+    .flow-text-fields {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .sequence-style-controls {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    .sequence-icon-select {
+      width: 48px;
+      height: 36px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255,255,255,0.06);
+      color: #e5e7eb;
+      font-weight: 900;
+      font-size: 16px;
+      outline: none;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .sequence-color-input {
+      width: 38px;
+      height: 36px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      padding: 4px;
+      cursor: pointer;
+    }
+
+    .sequence-color-input::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    .sequence-color-input::-webkit-color-swatch {
+      border: none;
+      border-radius: 7px;
+    }
+
+    .flow-title-input,
+    .flow-description-input {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #e5e7eb;
+      outline: none;
+      border-radius: 8px;
+      padding: 3px 7px;
+    }
+
+    .flow-title-input {
+      font-weight: 900;
+      font-size: 18px;
+      letter-spacing: -0.02em;
+    }
+
+    .flow-description-input {
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+    }
+
+    .flow-title-input:hover,
+    .flow-description-input:hover,
+    .flow-title-input:focus,
+    .flow-description-input:focus {
+      border-color: rgba(147, 197, 253, 0.35);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .flow-description-input::placeholder,
+    .flow-title-input::placeholder {
+      color: #64748b;
+    }
+
+    .flow-toolbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .trash-dropzone {
+      width: 34px;
+      height: 32px;
+      border-radius: 10px;
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      background: rgba(239, 68, 68, 0.10);
+      color: #fecaca;
+      display: grid;
+      place-items: center;
+      cursor: default;
+      flex-shrink: 0;
+    }
+
+    .trash-dropzone svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      pointer-events: none;
+    }
+
+    .trash-dropzone:hover,
+    .trash-dropzone.drag-over {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(239, 68, 68, 0.24);
+    }
+
+    .flow-mini-btn {
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: rgba(255, 255, 255, 0.06);
+      color: #e5e7eb;
+      border-radius: 10px;
+      padding: 6px 9px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    .flow-mini-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    #zoomOutBtn:hover,
+    #zoomInBtn:hover {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: white;
+    }
+
+    #clearSequenceBtn {
+      border-color: rgba(239, 68, 68, 0.45);
+      color: #fecaca;
+      background: rgba(239, 68, 68, 0.12);
+    }
+
+    #clearSequenceBtn:hover {
+      background: var(--red);
+      color: white;
+    }
+
+    #saveSequenceBtn {
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #bbf7d0;
+      background: rgba(34, 197, 94, 0.13);
+    }
+
+    #saveSequenceBtn:hover {
+      background: var(--green);
+      color: white;
+    }
+
+    #runSequenceBtn {
+      border-color: rgba(37, 99, 235, 0.48);
+      color: #bfdbfe;
+      background: rgba(37, 99, 235, 0.16);
+    }
+
+    #runSequenceBtn:hover {
+      background: var(--blue);
+      color: white;
+    }
+
+    #resetViewBtn {
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #fde68a;
+      background: rgba(245, 158, 11, 0.13);
+    }
+
+    #resetViewBtn:hover {
+      background: var(--yellow);
+      color: white;
+    }
+
+    .flow-viewport {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      overflow: hidden;
+      cursor: grab;
+      background:
+        radial-gradient(circle at 20px 20px, rgba(148, 163, 184, 0.20) 1px, transparent 1px),
+        #111827;
+      background-size: 24px 24px;
+    }
+
+    .flow-viewport.panning {
+      cursor: grabbing;
+    }
+
+    .flow-world {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3000px;
+      height: 2000px;
+      transform-origin: 0 0;
+    }
+
+    .flow-svg {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 3000px;
+      height: 2000px;
+      overflow: visible;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-node {
+      position: absolute;
+      width: max-content;
+      min-width: 120px;
+      max-width: 240px;
+      min-height: 54px;
+      border-radius: 16px;
+      padding: 13px 46px 13px 16px;
+      color: white;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.32);
+      cursor: grab;
+      user-select: none;
+      overflow: visible;
+      z-index: 3;
+      display: flex;
+      align-items: center;
+    }
+
+    .flow-node strong {
+      margin: 0;
+      max-width: 178px;
+      line-height: 1.15;
+      overflow-wrap: anywhere;
+      white-space: normal;
+    }
+
+    .flow-node.dragging {
+      opacity: 0.9;
+      cursor: grabbing;
+      z-index: 50 !important;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.38);
+      transition: none !important;
+    }
+
+    .flow-card.node-dragging-active .flow-node.dragging.over-trash {
+      transform: scale(0.78);
+      opacity: 0.55;
+    }
+
+    .flow-card.node-dragging-active .trash-dropzone.drag-over {
+      background: var(--red);
+      color: white;
+      border-color: var(--red);
+      transform: translateY(-1px) scale(1.08);
+      box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.18), 0 12px 28px rgba(239, 68, 68, 0.32);
+    }
+
+    .position-block.is-dragging {
+      opacity: 0.45;
+    }
+
+    .position-drag-floater {
+      position: fixed !important;
+      left: 0;
+      top: 0;
+      z-index: 100000 !important;
+      pointer-events: none;
+      margin: 0;
+      opacity: 0.96;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+      cursor: grabbing;
+      min-width: 120px;
+      min-height: 54px;
+    }
+
+    body.palette-dragging,
+    body.palette-dragging * {
+      cursor: grabbing !important;
+      user-select: none !important;
+    }
+
+    .flow-viewport.palette-drag-over {
+      box-shadow: inset 0 0 0 2px rgba(56, 189, 248, 0.55);
+    }
+
+    .flow-trash-anim {
+      position: fixed !important;
+      z-index: 200000 !important;
+      pointer-events: none;
+      margin: 0;
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.38);
+    }
+
+    .flow-trash-anim .node-port,
+    .flow-trash-anim .node-edit-icon {
+      display: none;
+    }
+
+    .node-port {
+      position: absolute;
+      top: 50%;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: #e0f2fe;
+      border: 3px solid #38bdf8;
+      transform: translateY(-50%);
+      z-index: 10;
+      cursor: crosshair;
+    }
+
+    .node-port.input {
+      left: -7px;
+    }
+
+    .node-port.output {
+      right: -7px;
+    }
+
+    .node-port.active {
+      background: #fef08a;
+      border-color: #facc15;
+    }
+
+    .node-delete {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      z-index: 12;
+      border: none;
+      background: rgba(239, 68, 68, 0.95);
+      color: white;
+      border-radius: 8px;
+      font-weight: 900;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+    }
+
+    .node-delete:hover {
+      background: white;
+      color: var(--red-dark);
+    }
+
+    .edge-delay-input {
+      position: absolute;
+      width: 40px;
+      height: 22px;
+      border: 1px solid rgba(147, 197, 253, 0.55);
+      background: rgba(15, 23, 42, 0.92);
+      color: #e5e7eb;
+      border-radius: 7px;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      z-index: 4;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.22);
+      padding: 0;
+    }
+
+    .edge-delay-input:focus {
+      outline: 2px solid #60a5fa;
+    }
+
+    .edge-delay-input::-webkit-outer-spin-button,
+    .edge-delay-input::-webkit-inner-spin-button {
+      appearance: none;
+      margin: 0;
+    }
+
+    .right-panel {
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) minmax(180px, 260px);
+      gap: 18px;
+      min-height: 0;
+    }
+
+    .sequence-log-card {
+      background: var(--dark);
+      color: #e5e7eb;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 1px solid #0f172a;
+      padding: 14px;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .saved-sequence-list {
+      gap: 14px;
+    }
+
+    .saved-sequence-block {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      background: linear-gradient(180deg, #ffffff, #f8fafc);
+      border-radius: 18px;
+      padding: 14px;
+      flex-shrink: 0;
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+    }
+
+    .saved-sequence-block::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 5px;
+      background: var(--sequence-color, var(--blue));
+    }
+
+    .saved-sequence-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .saved-sequence-block.no-description .saved-sequence-top {
+      align-items: center;
+    }
+
+    .saved-sequence-block.no-description .saved-sequence-title strong {
+      line-height: 1;
+    }
+
+    .saved-sequence-icon {
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: color-mix(in srgb, var(--sequence-color, var(--blue)) 14%, white);
+      color: var(--sequence-color, var(--blue));
+      font-weight: 900;
+      font-size: 20px;
+    }
+
+    .saved-sequence-title {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .saved-sequence-title strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.2;
+    }
+
+    .saved-sequence-description {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+      font-weight: 650;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+
+    .saved-sequence-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .edit-sequence-btn,
+    .run-saved-sequence-btn,
+    .delete-sequence-btn {
+      border: none;
+      border-radius: 11px;
+      padding: 9px 8px;
+      font-weight: 900;
+      cursor: pointer;
+      color: white;
+      font-size: 13px;
+    }
+
+    .edit-sequence-btn {
+      background: var(--blue);
+    }
+
+    .edit-sequence-btn:hover {
+      background: var(--blue-dark);
+      transform: translateY(-1px);
+    }
+
+    .run-saved-sequence-btn {
+      background: var(--green);
+    }
+
+    .run-saved-sequence-btn:hover {
+      background: var(--green-dark);
+      transform: translateY(-1px);
+    }
+
+    .delete-sequence-btn {
+      background: var(--red);
+    }
+
+    .delete-sequence-btn:hover {
+      background: var(--red-dark);
+      transform: translateY(-1px);
+    }
+
+    .empty-state {
+      color: var(--muted);
+      font-size: 14px;
+      padding: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #f9fafb;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      padding: 24px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(460px, 100%);
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.25);
+      padding: 22px;
+      animation: popIn 0.16s ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal h2 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .modal p {
+      margin: 8px 0 16px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .modal-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 15px;
+      font-weight: 700;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .modal-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .modal-textarea {
+      width: 100%;
+      min-height: 86px;
+      margin-top: 10px;
+      resize: vertical;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 14px;
+      font-weight: 650;
+      outline: none;
+      transition: 0.2s ease;
+    }
+
+    .modal-textarea:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .position-editor-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .position-angle-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .position-angle-field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .position-angle-field input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 14px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .position-angle-field input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    }
+
+    .modal-textarea.hidden-field {
+      display: none;
+    }
+
+    .modal-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .modal-cancel,
+    .modal-confirm {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .modal-cancel {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .modal-cancel:hover {
+      background: #d1d5db;
+    }
+
+    .modal-confirm {
+      background: var(--green);
+      color: white;
+    }
+
+    .modal-confirm:hover {
+      background: var(--green-dark);
+    }
+
+
+
+    /* Icon/color picker for sequence style */
+    .flow-meta {
+      grid-template-columns: 46px minmax(0, 1fr);
+    }
+
+    .sequence-badge-preview {
+      border: none;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .sequence-badge-preview:hover {
+      transform: translateY(-1px) scale(1.03);
+      filter: brightness(1.04);
+    }
+
+    .sequence-badge-preview::after {
+      content: "✎";
+      position: absolute;
+      right: -5px;
+      bottom: -5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: #0f172a;
+      color: white;
+      font-size: 10px;
+      border: 2px solid #1f2937;
+    }
+
+
+    .sequence-badge-preview svg,
+    .style-picker-preview svg,
+    .saved-sequence-icon svg,
+    .icon-choice svg {
+      width: 24px;
+      height: 24px;
+      display: block;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sequence-badge-preview svg,
+    .style-picker-preview svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .saved-sequence-icon svg {
+      width: 25px;
+      height: 25px;
+    }
+
+    .style-picker-panel {
+      width: min(520px, 96vw);
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.25);
+      padding: 22px;
+      animation: popIn 0.16s ease-out;
+    }
+
+    .style-picker-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .style-picker-title h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .style-picker-preview {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      color: white;
+      font-size: 28px;
+      font-weight: 900;
+      box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+      flex-shrink: 0;
+    }
+
+    .picker-section-label {
+      margin: 16px 0 10px;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .color-choice {
+      width: 42px;
+      height: 42px;
+      border-radius: 999px;
+      border: 3px solid transparent;
+      cursor: pointer;
+      justify-self: center;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+    }
+
+    .color-choice.selected {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+    }
+
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 10px;
+    }
+
+    .icon-choice {
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .icon-choice:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+      color: #334155;
+      transform: translateY(-1px);
+    }
+
+    .icon-choice.selected {
+      background: #f8fafc;
+      color: #111827;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13);
+    }
+
+    .style-picker-actions {
+      margin-top: 18px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+
+    @media (max-width: 1200px) {
+      .brand-logo {
+        width: 74px;
+        height: 74px;
+      }
+
+      .brand h1 {
+        font-size: 44px;
+      }
+
+      .product-pill {
+        display: none;
+      }
+    }
+    @media (max-width: 1200px) {
+      main {
+        grid-template-columns: 1fr 360px;
+        padding: 14px;
+        gap: 14px;
+      }
+
+      .servo-card {
+        padding: 13px;
+      }
+
+      .servo-img {
+        max-height: 125px;
+      }
+
+      .sequence-page {
+        grid-template-columns: 260px minmax(0, 1fr) 280px;
+      }
+    }
+  
+
+    /* ===== Toolbar responsive fix ===== */
+    .flow-toolbar {
+      display: grid;
+      grid-template-columns: minmax(210px, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      min-height: 84px;
+      height: auto;
+      overflow: visible;
+    }
+
+    .flow-meta {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .flow-toolbar-actions {
+      min-width: 0;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+      row-gap: 6px;
+    }
+
+    .trash-dropzone {
+      width: 40px;
+      height: 36px;
+    }
+
+    .flow-mini-btn {
+      padding: 6px 8px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    #zoomLabel {
+      min-width: 54px;
+      text-align: center;
+      display: inline-block;
+      font-weight: 800;
+    }
+
+    @media (max-width: 1350px) {
+      .flow-toolbar {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+      }
+
+      .flow-toolbar-actions {
+        justify-content: flex-start;
+      }
+    }
+
+
+    /* ===== Final header typography / spacing override ===== */
+    header {
+      height: 116px;
+      padding: 0 36px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .brand {
+      gap: 30px;
+      align-items: center;
+    }
+
+    .brand-logo {
+      width: 88px;
+      height: 88px;
+      border: 1px solid rgba(226, 232, 240, 0.95);
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.10);
+      border-radius: 22px;
+      background: transparent;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .brand-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      padding: 0;
+    }
+
+    .brand h1 {
+      font-family: "Arial Black", "Inter", "Segoe UI Black", "Helvetica Neue", Arial, sans-serif;
+      font-size: 62px;
+      line-height: 0.92;
+      font-weight: 900;
+      letter-spacing: 0.004em;
+      word-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .brand h1 .brand-blue {
+      color: var(--blue);
+    }
+
+    .brand h1 .brand-black {
+      color: #0f172a;
+    }
+
+    .top-actions {
+      gap: 16px;
+      align-items: center;
+    }
+
+    .product-pill {
+      height: 44px;
+      padding: 0 16px;
+      border: 1px solid #dbeafe;
+      border-radius: 14px;
+      background: #eff6ff;
+      color: var(--blue-dark);
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.08);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .product-pill:hover {
+      background: var(--blue);
+      color: white;
+      border-color: var(--blue);
+      transform: translateY(-1px);
+    }
+
+    .product-pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      display: inline-block;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.9;
+    }
+
+    .project-list {
+      margin-top: 14px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .project-option {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      border-radius: 16px;
+      padding: 14px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .project-option.active {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+
+    .project-option strong {
+      color: #0f172a;
+      font-size: 15px;
+      font-weight: 900;
+    }
+
+    .project-option span {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .project-placeholder {
+      color: #64748b;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 4px 2px 0;
+    }
+
+    @media (max-width: 1200px) {
+      header {
+        height: 100px;
+        padding: 0 24px;
+      }
+
+      .brand {
+        gap: 20px;
+      }
+
+      .brand-logo {
+        width: 74px;
+        height: 74px;
+      }
+
+      .brand h1 {
+        font-size: 46px;
+      }
+
+      .product-pill {
+        display: none;
+      }
+    }
+
+
+    /* ===== TOP BAR BUTTON CONSISTENCY FIX ===== */
+    .top-actions {
+      gap: 12px;
+      align-items: center;
+    }
+
+    .product-pill,
+    .connect-btn,
+    .status-toggle,
+    .info-button {
+      height: 46px !important;
+      min-height: 46px !important;
+      border-radius: 14px !important;
+      font-size: 15px !important;
+      font-weight: 900 !important;
+      line-height: 1 !important;
+      letter-spacing: -0.01em !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      box-sizing: border-box !important;
+    }
+
+    .product-pill,
+    .connect-btn,
+    .status-toggle {
+      padding: 0 18px !important;
+    }
+
+    .info-button {
+      width: 46px !important;
+      padding: 0 !important;
+      font-size: 18px !important;
+    }
+
+    .product-pill::before {
+      content: none !important;
+      display: none !important;
+    }
+
+    .status-toggle .status-dot {
+      width: 11px !important;
+      height: 11px !important;
+    }
+
+  
+
+    /* ===== HEADER LOGO AS TRANSPARENT GEAR ===== */
+    .brand {
+      gap: 22px;
+    }
+
+    .brand-logo {
+      width: 62px !important;
+      height: 62px !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      display: grid !important;
+      place-items: center !important;
+      flex-shrink: 0 !important;
+    }
+
+    .brand-logo img {
+      width: 62px !important;
+      height: 62px !important;
+      object-fit: contain !important;
+      display: block !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+    }
+
+    .brand h1 {
+      letter-spacing: -0.035em !important;
+    }
+
+    @media (max-width: 1200px) {
+      .brand-logo,
+      .brand-logo img {
+        width: 54px !important;
+        height: 54px !important;
+      }
+    }
+
+  
+
+    /* ===== HEADER LOGO/TITLE FINAL TUNING ===== */
+    header {
+      height: 112px;
+      padding: 0 36px;
+    }
+
+    .brand {
+      gap: 34px;
+    }
+
+    .brand-logo {
+      width: 96px;
+      height: 96px;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+      overflow: visible;
+      display: grid;
+      place-items: center;
+    }
+
+    .brand-logo img {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      display: block;
+      padding: 0;
+      transform: scale(2.15);
+      transform-origin: center;
+    }
+
+    .brand h1 {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 64px;
+      line-height: 0.95;
+      font-weight: 900;
+      letter-spacing: -0.028em;
+    }
+
+    .brand h1 .brand-blue {
+      color: var(--blue);
+    }
+
+    .brand h1 .brand-black {
+      color: #0b1020;
+    }
+
+    .product-pill {
+      height: 46px;
+      padding: 0 18px;
+      font-size: 15px;
+      border-radius: 16px;
+    }
+
+    @media (max-width: 1200px) {
+      .brand {
+        gap: 24px;
+      }
+
+      .brand-logo {
+        width: 82px;
+        height: 82px;
+      }
+
+      .brand-logo img {
+        width: 82px;
+        height: 82px;
+        transform: scale(2.05);
+      }
+
+      .brand h1 {
+        font-size: 50px;
+      }
+    }
+
+
+
+    /* ===== FINAL HEADER GEAR / TYPOGRAPHY OVERRIDE ===== */
+    header {
+      height: 116px !important;
+      padding: 0 36px !important;
+    }
+
+    .brand {
+      gap: 36px !important;
+      align-items: center !important;
+    }
+
+    .brand-logo {
+      width: 112px !important;
+      height: 96px !important;
+      border: none !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      overflow: visible !important;
+      display: grid !important;
+      place-items: center !important;
+      padding: 0 !important;
+      cursor: pointer !important;
+      position: relative !important;
+      flex-shrink: 0 !important;
+    }
+
+    .brand-logo img {
+      width: 96px !important;
+      height: 96px !important;
+      object-fit: contain !important;
+      display: block !important;
+      padding: 0 !important;
+      background: transparent !important;
+      transform: scale(2.7) rotate(0deg);
+      transform-origin: center !important;
+      pointer-events: none !important;
+      transition: transform 0.34s ease, opacity 0.22s ease, filter 0.22s ease !important;
+    }
+
+    .brand-logo::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 74px;
+      height: 74px;
+      border-radius: 22px;
+      background: var(--blue);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.24);
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.45) rotate(-18deg);
+      transition:
+        opacity 0.18s ease,
+        transform 0.34s cubic-bezier(.2,.9,.2,1),
+        border-radius 0.34s cubic-bezier(.2,.9,.2,1);
+      pointer-events: none;
+    }
+
+    .brand-logo::after {
+      content: "i";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      display: block;
+      color: white;
+      font-size: 58px;
+      line-height: 0.9;
+      font-weight: 950;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.55) translateY(8px);
+      transition:
+        opacity 0.16s ease 0.08s,
+        transform 0.28s cubic-bezier(.2,.9,.2,1) 0.05s;
+      text-shadow: 0 4px 14px rgba(15, 23, 42, 0.16);
+      pointer-events: none;
+    }
+
+    .brand-logo:hover img,
+    .brand-logo:focus-visible img {
+      opacity: 0;
+      filter: blur(2px);
+      transform: scale(0.9) rotate(135deg);
+    }
+
+    .brand-logo:hover::before,
+    .brand-logo:focus-visible::before {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(0deg);
+      border-radius: 18px;
+    }
+
+    .brand-logo:hover::after,
+    .brand-logo:focus-visible::after {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) translateY(0);
+    }
+
+    .brand h1 {
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+      font-size: 64px !important;
+      line-height: 0.95 !important;
+      font-weight: 760 !important;
+      letter-spacing: 0.012em !important;
+      white-space: nowrap !important;
+    }
+
+    .brand h1 .brand-blue {
+      color: var(--blue) !important;
+      font-weight: 780 !important;
+    }
+
+    .brand h1 .brand-black {
+      color: #0b1020 !important;
+      font-weight: 760 !important;
+    }
+
+    @media (max-width: 1200px) {
+      .brand {
+        gap: 26px !important;
+      }
+
+      .brand-logo {
+        width: 92px !important;
+        height: 80px !important;
+      }
+
+      .brand-logo img {
+        width: 80px !important;
+        height: 80px !important;
+        transform: scale(2.55);
+      }
+
+      .brand h1 {
+        font-size: 50px !important;
+      }
+    }
+
+  
+
+    /* ===== ACCELERATING GEAR TO INFO MORPH ===== */
+    .brand-logo img {
+      opacity: 1;
+      filter: none;
+      transform: scale(2.7) rotate(0deg);
+      transition: none !important;
+      animation: none;
+      will-change: transform, opacity, filter;
+    }
+
+    .brand-logo::before {
+      width: 64px !important;
+      height: 64px !important;
+      border-radius: 18px !important;
+      background: var(--blue) !important;
+      border: 2px solid rgba(255,255,255,0.95);
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28) !important;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.18) rotate(0deg);
+      transition: none !important;
+      will-change: transform, opacity, border-radius;
+    }
+
+    .brand-logo::after {
+      color: white !important;
+      content: "i";
+      font-size: 48px !important;
+      line-height: 1 !important;
+      font-weight: 950 !important;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.18) rotate(0deg);
+      transition: none !important;
+      text-shadow: 0 4px 12px rgba(15, 23, 42, 0.16) !important;
+      will-change: transform, opacity;
+    }
+
+    .brand-logo:hover img,
+    .brand-logo:focus-visible img {
+      animation: gearAccelerateShrink 1.65s cubic-bezier(.16,.02,.08,1) forwards;
+    }
+
+    .brand-logo:hover::before,
+    .brand-logo:focus-visible::before {
+      animation: infoShapeFromGear 1.65s cubic-bezier(.16,.02,.08,1) forwards;
+    }
+
+    .brand-logo:hover::after,
+    .brand-logo:focus-visible::after {
+      animation: infoLetterFromGear 1.65s cubic-bezier(.16,.02,.08,1) forwards;
+    }
+
+    @keyframes gearAccelerateShrink {
+      0% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.7) rotate(0deg);
+      }
+      20% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.62) rotate(24deg);
+      }
+      42% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.25) rotate(115deg);
+      }
+      64% {
+        opacity: 0.9;
+        filter: blur(0.15px);
+        transform: scale(1.55) rotate(340deg);
+      }
+      82% {
+        opacity: 0.42;
+        filter: blur(0.55px);
+        transform: scale(0.78) rotate(760deg);
+      }
+      100% {
+        opacity: 0;
+        filter: blur(1.2px);
+        transform: scale(0.42) rotate(1260deg);
+      }
+    }
+
+    @keyframes infoShapeFromGear {
+      0%, 58% {
+        opacity: 0;
+        border-radius: 22px;
+        transform: translate(-50%, -50%) scale(0.16) rotate(0deg);
+      }
+      72% {
+        opacity: 0.18;
+        border-radius: 18px;
+        transform: translate(-50%, -50%) scale(0.62) rotate(360deg);
+      }
+      86% {
+        opacity: 0.78;
+        border-radius: 17px;
+        transform: translate(-50%, -50%) scale(0.93) rotate(700deg);
+      }
+      100% {
+        opacity: 1;
+        border-radius: 16px;
+        transform: translate(-50%, -50%) scale(1) rotate(720deg);
+      }
+    }
+
+    @keyframes infoLetterFromGear {
+      0%, 66% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.16) rotate(0deg);
+      }
+      78% {
+        opacity: 0.28;
+        transform: translate(-50%, -50%) scale(0.58) rotate(360deg);
+      }
+      90% {
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(0.92) rotate(700deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(720deg);
+      }
+    }
+
+  
+
+    /* ===== SMOOTHER GEAR MORPH + CIRCULAR INFO BADGE ===== */
+    .brand-logo {
+      transform: translateZ(0);
+    }
+
+    .brand-logo img {
+      transform-origin: 50% 50% !important;
+      backface-visibility: hidden;
+      will-change: transform, opacity, filter;
+    }
+
+    .brand-logo::before {
+      width: 64px !important;
+      height: 64px !important;
+      border-radius: 999px !important;
+      background: var(--blue) !important;
+      border: 2px solid rgba(255,255,255,0.95) !important;
+      box-shadow: 0 14px 30px rgba(37, 99, 235, 0.30) !important;
+      transform-origin: 50% 50% !important;
+      will-change: transform, opacity;
+    }
+
+    .brand-logo::after {
+      color: white !important;
+      font-size: 48px !important;
+      font-weight: 950 !important;
+      line-height: 1 !important;
+      transform-origin: 50% 50% !important;
+      will-change: transform, opacity;
+    }
+
+    .brand-logo:hover img,
+    .brand-logo:focus-visible img {
+      animation: gearSmoothAccelerateShrink 1.20s linear forwards !important;
+    }
+
+    .brand-logo:hover::before,
+    .brand-logo:focus-visible::before {
+      animation: infoCircleSmoothIn 1.20s linear forwards !important;
+    }
+
+    .brand-logo:hover::after,
+    .brand-logo:focus-visible::after {
+      animation: infoLetterSmoothIn 1.20s linear forwards !important;
+    }
+
+    @keyframes gearSmoothAccelerateShrink {
+      0% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.7) rotate(0deg);
+      }
+      12% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.66) rotate(18deg);
+      }
+      24% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.55) rotate(58deg);
+      }
+      36% {
+        opacity: 1;
+        filter: blur(0);
+        transform: scale(2.34) rotate(126deg);
+      }
+      48% {
+        opacity: 0.98;
+        filter: blur(0);
+        transform: scale(2.02) rotate(230deg);
+      }
+      60% {
+        opacity: 0.9;
+        filter: blur(0.12px);
+        transform: scale(1.58) rotate(335deg);
+      }
+      72% {
+        opacity: 0.68;
+        filter: blur(0.28px);
+        transform: scale(1.08) rotate(565deg);
+      }
+      84% {
+        opacity: 0.34;
+        filter: blur(0.55px);
+        transform: scale(0.64) rotate(880deg);
+      }
+      100% {
+        opacity: 0;
+        filter: blur(1px);
+        transform: scale(0.38) rotate(1280deg);
+      }
+    }
+
+    @keyframes infoCircleSmoothIn {
+      0%, 62% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.18) rotate(0deg);
+      }
+      74% {
+        opacity: 0.18;
+        transform: translate(-50%, -50%) scale(0.46) rotate(180deg);
+      }
+      86% {
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(0.82) rotate(420deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(720deg);
+      }
+    }
+
+    @keyframes infoLetterSmoothIn {
+      0%, 66% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.16) rotate(0deg);
+      }
+      78% {
+        opacity: 0.22;
+        transform: translate(-50%, -50%) scale(0.50) rotate(260deg);
+      }
+      90% {
+        opacity: 0.78;
+        transform: translate(-50%, -50%) scale(0.90) rotate(560deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1) rotate(720deg);
+      }
+    }
+
+  
+
+  /* ===== CONTROL PANEL REFINEMENT + RESTORED LOGO ANIMATION ===== */
+  #mainHeader .brand-logo img {
+    transform: scale(2.7) rotate(0deg);
+  }
+
+  #mainHeader .brand-logo:hover img,
+  #mainHeader .brand-logo:focus-visible img {
+    animation: gearSmoothAccelerateShrink 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmoothIn 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::after,
+  #mainHeader .brand-logo:focus-visible::after {
+    animation: infoLetterSmoothIn 1.20s linear forwards !important;
+  }
+
+  #controlPage .control-panel {
+    max-height: none !important;
+    height: fit-content !important;
+    min-height: 0 !important;
+    padding: 15px !important;
+    border-radius: 17px !important;
+  }
+
+  #controlPage .panel-title {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    font-size: 18px !important;
+    line-height: 1.1 !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.025em !important;
+    margin: 0 0 13px !important;
+    color: #f8fafc !important;
+  }
+
+  #controlPage .panel-title::before {
+    content: "";
+    width: 8px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+    flex-shrink: 0;
+  }
+
+  #controlPage .home-btn {
+    padding: 11px 14px !important;
+    border-radius: 11px !important;
+    font-size: 13px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  #controlPage .speed-control {
+    margin-top: 12px !important;
+    padding: 12px !important;
+    border-radius: 13px !important;
+  }
+
+  #controlPage .speed-header {
+    font-size: 13px !important;
+    margin-bottom: 9px !important;
+  }
+
+  #controlPage .speed-delay {
+    margin-top: 7px !important;
+  }
+
+  #controlPage .serial-log-card {
+    flex: 0 0 auto !important;
+    margin-top: 12px !important;
+    padding: 12px !important;
+    border-radius: 13px !important;
+  }
+
+  #controlPage .serial-log-card .log-header {
+    margin-bottom: 9px !important;
+  }
+
+  #controlPage .log-title {
+    font-size: 14px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  #controlPage .clear-btn {
+    padding: 6px 9px !important;
+    border-radius: 9px !important;
+    font-size: 11px !important;
+  }
+
+  #controlPage .serial-log-preview {
+    height: 118px !important;
+    min-height: 118px !important;
+    max-height: 118px !important;
+    border-radius: 11px !important;
+  }
+
+  #controlPage .serial-log-card .log-footer {
+    margin-top: 8px !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader .brand-logo img {
+      transform: scale(2.55) rotate(0deg);
+    }
+
+    #controlPage .serial-log-preview {
+      height: 100px !important;
+      min-height: 100px !important;
+      max-height: 100px !important;
+    }
+  }
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header id="mainHeader">
+      <div class="brand">
+        <button class="brand-logo" id="authorInfoBtn" type="button" aria-label="Informazioni autore">
+          <img src="images/Logo.png" alt="Paio-robotics logo">
+        </button>
+
+        <div class="brand-text">
+          <div class="brand-title-row">
+            <h1><span class="brand-blue">Paio</span><span class="brand-black">-robotics</span></h1>
+          </div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="product-pill" id="projectSelectBtn" type="button">Braccio robotico</button>
+        <button class="connect-btn btn-success" id="connectBtn">Connetti Arduino</button>
+        <button class="status-toggle status-simulation" id="modeToggleBtn" type="button">
+          <span class="status-dot" id="modeStatusDot"></span>
+          <span id="modeToggleText">Modalità: Simulazione</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="controlPage">
+      <section class="cards-grid" id="cardsGrid"></section>
+
+      <aside class="control-panel">
+        <div class="panel-title">Controllo Movimento</div>
+
+        <button class="home-btn primary-action" id="homeBtn">Posizione base</button>
+        <button class="home-btn save-action" id="savePositionBtn">Salva posizione attuale</button>
+        <button class="home-btn sequence-action" id="sequenceViewBtn">Sequenze</button>
+
+        <div class="speed-control">
+          <div class="speed-header">
+            <span>Velocità movimento</span>
+            <strong id="speedValue">50%</strong>
+          </div>
+
+          <input class="speed-slider" id="speedSlider" type="range" min="0" max="100" value="50">
+
+          <div class="speed-labels">
+            <span>Lento</span>
+            <span>Veloce</span>
+          </div>
+
+          <div class="speed-delay" id="speedDelayValue">speedDelay: 25</div>
+        </div>
+
+        <div class="serial-log-card" id="openLogBtn" role="button" tabindex="0" title="Apri log seriale completo">
+          <div class="log-header">
+            <div class="log-title">Log seriale</div>
+            <button class="clear-btn" id="clearLogBtn" type="button"><svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg><span>Cancella</span></button>
+          </div>
+
+          <div class="log-box serial-log-preview" id="logBox"></div>
+
+          <div class="log-footer">
+            Clicca qui per aprire il log completo. TX · RX · SYS
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <section class="sequence-page hidden" id="sequencePage">
+      <button class="sequence-back-btn" id="backToControlBtn" title="Torna al controllo">←</button>
+
+      <section class="sequence-card left-card">
+        <h3>Blocchi posizione</h3>
+        <p class="sequence-help">Tieni premuto un blocco e trascinalo nel foglio nero.</p>
+        <div class="saved-positions" id="savedPositions"></div>
+      </section>
+
+      <section class="sequence-card flow-card">
+        <div class="flow-toolbar">
+          <div class="flow-meta">
+            <button class="sequence-badge-preview" id="sequenceBadgePreview" type="button" title="Scegli icona e colore"></button>
+            <div class="flow-text-fields">
+              <input class="flow-title-input" id="flowTitleInput" type="text" value="Nuova sequenza" placeholder="Titolo sequenza">
+              <input class="flow-description-input" id="flowDescriptionInput" type="text" placeholder="Descrizione sequenza">
+            </div>
+          </div>
+          <div class="flow-toolbar-actions">
+            <div class="trash-dropzone" id="trashDropzone" title="Trascina qui un blocco per eliminarlo" aria-label="Elimina blocco">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 7h16"/>
+                <path d="M10 11v6"/>
+                <path d="M14 11v6"/>
+                <path d="M6 7l1 14h10l1-14"/>
+                <path d="M9 7V4h6v3"/>
+              </svg>
+            </div>
+            <button class="flow-mini-btn" id="zoomOutBtn">−</button>
+            <span id="zoomLabel">100%</span>
+            <button class="flow-mini-btn" id="zoomInBtn">+</button>
+            <button class="flow-mini-btn" id="resetViewBtn">Reset vista</button>
+            <button class="flow-mini-btn" id="clearSequenceBtn">Svuota</button>
+            <button class="flow-mini-btn" id="saveSequenceBtn">Salva</button>
+            <button class="flow-mini-btn" id="runSequenceBtn">Esegui</button>
+          </div>
+        </div>
+
+        <div class="flow-viewport" id="flowViewport">
+          <div class="flow-world" id="flowWorld">
+            <svg class="flow-svg" id="flowSvg">
+              <defs>
+                <marker id="arrowHead" markerWidth="6" markerHeight="6" refX="5" refY="2.5" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,5 L5,2.5 z" fill="#93c5fd"></path>
+                </marker>
+              </defs>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <aside class="right-panel">
+        <section class="sequence-card">
+          <h3>Sequenze salvate</h3>
+          <div class="saved-sequences saved-sequence-list" id="savedSequences"></div>
+        </section>
+
+        <section class="sequence-log-card">
+          <div class="serial-log-card" id="openSequenceLogBtn" role="button" tabindex="0" title="Apri log seriale completo">
+            <div class="log-header">
+              <div class="log-title">Log seriale</div>
+              <button class="clear-btn" id="clearSequenceLogBtn" type="button"><svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg><span>Cancella</span></button>
+            </div>
+            <div class="log-box serial-log-preview" id="sequenceLogBox"></div>
+            <div class="log-footer">Clicca qui per aprire il log completo.</div>
+          </div>
+        </section>
+      </aside>
+    </section>
+  </div>
+
+  <div class="modal-overlay" id="authorModal">
+    <div class="modal">
+      <h2>Informazioni</h2>
+      <p>Contatti e autore.</p>
+      <div class="contact-card">
+        <div class="contact-row">
+          <strong>Autore</strong>
+          <span>Lamberto Paioletti</span>
+        </div>
+        <div class="contact-row">
+          <strong>Email</strong>
+          <a href="mailto:lamberto@paioletti.biz">lamberto@paioletti.biz</a>
+        </div>
+        <div class="contact-row">
+          <strong>Telefono</strong>
+          <a href="tel:+393441489445">+39 3441489445</a>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-confirm" id="authorModalCloseBtn" type="button">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="projectModal">
+    <div class="modal">
+      <h2>Progetti</h2>
+      <p>Scegli il progetto da controllare. Al momento è disponibile solo il braccio robotico.</p>
+      <div class="project-list">
+        <div class="project-option active">
+          <strong>Braccio robotico</strong>
+          <span>Controllo servo e sequenze di movimento.</span>
+        </div>
+        <div class="project-placeholder">Altri progetti verranno aggiunti in futuro.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-confirm" id="projectModalCloseBtn" type="button">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="nameModal">
+    <div class="modal">
+      <h2 id="modalTitle">Salva</h2>
+      <p id="modalDescription">Inserisci un nome.</p>
+      <input class="modal-input" id="modalInput" type="text">
+      <textarea class="modal-textarea hidden-field" id="modalDescriptionInput" placeholder="Descrizione della sequenza"></textarea>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modalCancelBtn" type="button">Annulla</button>
+        <button class="modal-confirm" id="modalConfirmBtn" type="button">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="positionModal">
+    <div class="modal">
+      <h2>Modifica posizione</h2>
+      <p>Modifica titolo, descrizione e angoli manualmente.</p>
+      <input class="modal-input" id="positionTitleInput" type="text" placeholder="Titolo posizione">
+      <textarea class="modal-textarea" id="positionDescriptionInput" placeholder="Descrizione posizione"></textarea>
+      <div class="position-editor-grid" id="positionAnglesGrid"></div>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="positionCancelBtn" type="button">Annulla</button>
+        <button class="modal-confirm" id="positionSaveBtn" type="button">Salva</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="alertModal">
+    <div class="modal">
+      <h2 id="alertTitle">Avviso</h2>
+      <p id="alertMessage">Messaggio</p>
+      <div class="modal-actions">
+        <button class="modal-confirm" id="alertOkBtn" type="button">Ok</button>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal-overlay" id="stylePickerModal">
+    <div class="style-picker-panel">
+      <div class="style-picker-title">
+        <div>
+          <h2>Scegli icona</h2>
+          <p style="margin: 6px 0 0; color: #64748b; font-weight: 700;">Logo e colore verranno salvati nella sequenza.</p>
+        </div>
+        <div class="style-picker-preview" id="stylePickerPreview"></div>
+      </div>
+
+      <div class="picker-section-label">Colore</div>
+      <div class="color-grid" id="styleColorGrid"></div>
+
+      <div class="picker-section-label">Simbolo</div>
+      <div class="icon-grid" id="styleIconGrid"></div>
+
+      <div class="style-picker-actions">
+        <button class="modal-cancel" id="styleCancelBtn" type="button">Annulla</button>
+        <button class="modal-confirm" id="styleConfirmBtn" type="button">Applica</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="logModal">
+    <div class="log-modal-card">
+      <div class="log-header">
+        <div class="log-title">Log seriale completo</div>
+        <div class="log-modal-actions">
+          <button class="clear-btn" id="clearBigLogBtn" type="button"><svg class="trash-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M6 7l1 14h10l1-14"/><path d="M9 7V4h6v3"/></svg><span>Cancella</span></button>
+          <button class="close-log-btn" id="closeLogModalBtn" type="button">Chiudi</button>
+        </div>
+      </div>
+      <div class="log-box" id="modalLogBox"></div>
+      <div class="log-footer">TX = inviato ad Arduino · RX = ricevuto da Arduino · SYS = timer interno</div>
+    </div>
+  </div>
+
+  <script>
+    const servos = [
+      { id: 1, title: "Apertura Pinza", subtitle: "Apre/chiude la pinza", image: "images/Pos1.png", initialAngle: 65, homeAngle: 65, maxAngle: 65 },
+      { id: 2, title: "Rotazione Pinza", subtitle: "Ruota la pinza", image: "images/Pos2.png", initialAngle: 90, homeAngle: 45 },
+      { id: 3, title: "Polso", subtitle: "Muove il polso su/giù", image: "images/Pos3.png", initialAngle: 90, homeAngle: 120 },
+      { id: 4, title: "Gomito", subtitle: "Piega/estende il braccio", image: "images/Pos4.png", initialAngle: 90, homeAngle: 180 },
+      { id: 5, title: "Rotazione Braccio", subtitle: "Ruota il braccio", image: "images/Pos5.png", initialAngle: 90, homeAngle: 90 },
+      { id: 6, title: "Rotazione Base", subtitle: "Ruota l’intera base", image: "images/Pos6.png", initialAngle: 90, homeAngle: 90 }
+    ];
+
+    const authorInfoBtn = document.getElementById("authorInfoBtn");
+    const authorModal = document.getElementById("authorModal");
+    const authorModalCloseBtn = document.getElementById("authorModalCloseBtn");
+    const projectSelectBtn = document.getElementById("projectSelectBtn");
+    const projectModal = document.getElementById("projectModal");
+    const projectModalCloseBtn = document.getElementById("projectModalCloseBtn");
+
+    const mainHeader = document.getElementById("mainHeader");
+    const controlPage = document.getElementById("controlPage");
+    const sequencePage = document.getElementById("sequencePage");
+
+    const cardsGrid = document.getElementById("cardsGrid");
+    const clearLogBtn = document.getElementById("clearLogBtn");
+    const clearSequenceLogBtn = document.getElementById("clearSequenceLogBtn");
+    const openLogBtn = document.getElementById("openLogBtn");
+    const openSequenceLogBtn = document.getElementById("openSequenceLogBtn");
+    const logModal = document.getElementById("logModal");
+    const closeLogModalBtn = document.getElementById("closeLogModalBtn");
+    const clearBigLogBtn = document.getElementById("clearBigLogBtn");
+    const connectBtn = document.getElementById("connectBtn");
+    const modeToggleBtn = document.getElementById("modeToggleBtn");
+    const modeToggleText = document.getElementById("modeToggleText");
+    const homeBtn = document.getElementById("homeBtn");
+    const speedSlider = document.getElementById("speedSlider");
+    const speedValue = document.getElementById("speedValue");
+    const speedDelayValue = document.getElementById("speedDelayValue");
+
+    const sequenceViewBtn = document.getElementById("sequenceViewBtn");
+    const backToControlBtn = document.getElementById("backToControlBtn");
+    const savePositionBtn = document.getElementById("savePositionBtn");
+    const savedPositionsBox = document.getElementById("savedPositions");
+    const savedSequencesBox = document.getElementById("savedSequences");
+
+    const flowViewport = document.getElementById("flowViewport");
+    const flowWorld = document.getElementById("flowWorld");
+    const flowSvg = document.getElementById("flowSvg");
+    const trashDropzone = document.getElementById("trashDropzone");
+    const zoomInBtn = document.getElementById("zoomInBtn");
+    const zoomOutBtn = document.getElementById("zoomOutBtn");
+    const resetViewBtn = document.getElementById("resetViewBtn");
+    const zoomLabel = document.getElementById("zoomLabel");
+    const flowTitleInput = document.getElementById("flowTitleInput");
+    const flowDescriptionInput = document.getElementById("flowDescriptionInput");
+    const sequenceBadgePreview = document.getElementById("sequenceBadgePreview");
+    const stylePickerModal = document.getElementById("stylePickerModal");
+    const stylePickerPreview = document.getElementById("stylePickerPreview");
+    const styleColorGrid = document.getElementById("styleColorGrid");
+    const styleIconGrid = document.getElementById("styleIconGrid");
+    const styleCancelBtn = document.getElementById("styleCancelBtn");
+    const styleConfirmBtn = document.getElementById("styleConfirmBtn");
+    const clearSequenceBtn = document.getElementById("clearSequenceBtn");
+    const saveSequenceBtn = document.getElementById("saveSequenceBtn");
+    const runSequenceBtn = document.getElementById("runSequenceBtn");
+
+    const nameModal = document.getElementById("nameModal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalDescription = document.getElementById("modalDescription");
+    const modalInput = document.getElementById("modalInput");
+    const modalDescriptionInput = document.getElementById("modalDescriptionInput");
+    const modalCancelBtn = document.getElementById("modalCancelBtn");
+    const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+    const alertModal = document.getElementById("alertModal");
+    const alertTitle = document.getElementById("alertTitle");
+    const alertMessage = document.getElementById("alertMessage");
+    const alertOkBtn = document.getElementById("alertOkBtn");
+    const positionModal = document.getElementById("positionModal");
+    const positionTitleInput = document.getElementById("positionTitleInput");
+    const positionDescriptionInput = document.getElementById("positionDescriptionInput");
+    const positionAnglesGrid = document.getElementById("positionAnglesGrid");
+    const positionCancelBtn = document.getElementById("positionCancelBtn");
+    const positionSaveBtn = document.getElementById("positionSaveBtn");
+
+    const logBoxes = [
+      document.getElementById("logBox"),
+      document.getElementById("sequenceLogBox"),
+      document.getElementById("modalLogBox")
+    ].filter(Boolean);
+
+    let simulationMode = true;
+    let port = null;
+    let writer = null;
+    let reader = null;
+    let serialBuffer = "";
+    let moveDoneResolver = null;
+    let sequenceRunning = false;
+    let speedDelay = 25;
+
+    let savedPositions = JSON.parse(localStorage.getItem("savedPositions")) || [];
+    let savedSequences = JSON.parse(localStorage.getItem("savedSequences")) || [];
+
+    let flowNodes = [];
+    let flowEdges = [];
+    let currentEditingSequenceId = null;
+    let selectedSequenceIcon = "arm";
+    let selectedSequenceColor = "#2563eb";
+    let draftSequenceIcon = selectedSequenceIcon;
+    let draftSequenceColor = selectedSequenceColor;
+
+    const iconSvgMap = {
+      arm: `<svg viewBox="0 0 24 24"><path d="M5 19h14"/><path d="M7 19v-5l4-3 4 4"/><circle cx="7" cy="7" r="2.5"/><path d="M9.5 7H14l3 3-3 3"/></svg>`,
+      gripper: `<svg viewBox="0 0 24 24"><path d="M4 18h8"/><path d="M6 18v-5l4-3"/><path d="M12 10l4-4"/><path d="M16 6l4 4"/><path d="M16 6v5"/></svg>`,
+      wrench: `<svg viewBox="0 0 24 24"><path d="M14.5 5.5a4 4 0 0 0 4 4L9 19l-4-4 9.5-9.5Z"/><path d="M5 15l4 4"/></svg>`,
+      gear: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>`,
+      rotate: `<svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.5-5.8"/><path d="M17.5 2v4.2H13"/><path d="M20 12a8 8 0 0 1-13.5 5.8"/><path d="M6.5 22v-4.2H11"/></svg>`,
+      target: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>`,
+      magnet: `<svg viewBox="0 0 24 24"><path d="M7 4v8a5 5 0 0 0 10 0V4"/><path d="M7 4h4M13 4h4M7 9h4M13 9h4"/></svg>`,
+      box: `<svg viewBox="0 0 24 24"><path d="M4 7l8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/></svg>`,
+      route: `<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h5a3 3 0 0 1 0 6h-2a3 3 0 0 0 0 6h5"/></svg>`,
+      timer: `<svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M9 2h6M12 6v7l4 2"/></svg>`,
+      play: `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z"/></svg>`,
+      code: `<svg viewBox="0 0 24 24"><path d="m8 8-4 4 4 4"/><path d="m16 8 4 4-4 4"/><path d="m14 4-4 16"/></svg>`,
+      board: `<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2"/><path d="M9 9h6M9 13h2M15 13h0M9 17h0M13 17h2"/><path d="M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>`,
+      sensor: `<svg viewBox="0 0 24 24"><path d="M12 19a7 7 0 1 0 0-14"/><path d="M12 15a3 3 0 1 0 0-6"/><path d="M12 12h9"/></svg>`,
+      home: `<svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/></svg>`,
+      star: `<svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>`
+    };
+
+    const sequenceIcons = ["arm", "gripper", "wrench", "gear", "rotate", "target", "magnet", "box", "route", "timer", "play", "code", "board", "sensor", "home", "star"];
+    const sequenceColors = ["#000000", "#ef4444", "#f97316", "#f59e0b", "#22c55e", "#2563eb", "#8b5cf6", "#ec4899", "#00a7b5", "#14b8a6", "#64748b", "#111827"];
+
+    function getIconSvg(iconId) {
+      return iconSvgMap[iconId] || iconSvgMap.arm;
+    }
+
+    let view = { x: 40, y: 40, scale: 1 };
+    let panning = false;
+    let panStart = { x: 0, y: 0 };
+    let viewStart = { x: 0, y: 0 };
+
+    let draggingNodeId = null;
+    let nodeDragStart = { x: 0, y: 0 };
+    let nodeStart = { x: 0, y: 0 };
+
+    let positionDragPreview = null;
+    let positionDragOffsetX = 0;
+    let positionDragOffsetY = 0;
+    let paletteDraggingPositionId = null;
+
+    let pendingConnectionFrom = null;
+    let modalResolver = null;
+    let editingPositionId = null;
+    let editingFlowNodeId = null;
+
+    function askName({ title, description, defaultValue }) {
+      modalTitle.textContent = title;
+      modalDescription.textContent = description;
+      modalInput.value = defaultValue;
+      modalDescriptionInput.value = "";
+      modalDescriptionInput.classList.add("hidden-field");
+      nameModal.classList.add("open");
+
+      setTimeout(() => {
+        modalInput.focus();
+        modalInput.select();
+      }, 30);
+
+      return new Promise((resolve) => {
+        modalResolver = resolve;
+      });
+    }
+
+    function askSequenceDetails({ title, description, defaultTitle, defaultDescription = "" }) {
+      modalTitle.textContent = title;
+      modalDescription.textContent = description;
+      modalInput.value = defaultTitle;
+      modalDescriptionInput.value = defaultDescription;
+      modalDescriptionInput.classList.remove("hidden-field");
+      nameModal.classList.add("open");
+
+      setTimeout(() => {
+        modalInput.focus();
+        modalInput.select();
+      }, 30);
+
+      return new Promise((resolve) => {
+        modalResolver = resolve;
+      });
+    }
+
+    function closeNameModal(value) {
+      nameModal.classList.remove("open");
+
+      if (modalResolver) {
+        modalResolver(value);
+        modalResolver = null;
+      }
+    }
+
+    modalCancelBtn.addEventListener("click", () => {
+      closeNameModal(null);
+    });
+
+    modalConfirmBtn.addEventListener("click", () => {
+      const title = modalInput.value.trim();
+
+      if (!title) {
+        closeNameModal(null);
+        return;
+      }
+
+      if (!modalDescriptionInput.classList.contains("hidden-field")) {
+        closeNameModal({
+          title,
+          description: modalDescriptionInput.value.trim()
+        });
+        return;
+      }
+
+      closeNameModal(title);
+    });
+
+    function openAuthorModal() {
+      authorModal.classList.add("open");
+    }
+
+    function closeAuthorModal() {
+      authorModal.classList.remove("open");
+    }
+
+    authorInfoBtn.addEventListener("click", openAuthorModal);
+    authorModalCloseBtn.addEventListener("click", closeAuthorModal);
+    authorModal.addEventListener("mousedown", (event) => {
+      if (event.target === authorModal) {
+        closeAuthorModal();
+      }
+    });
+
+    function openProjectModal() {
+      projectModal.classList.add("open");
+    }
+
+    function closeProjectModal() {
+      projectModal.classList.remove("open");
+    }
+
+    projectSelectBtn.addEventListener("click", openProjectModal);
+    projectModalCloseBtn.addEventListener("click", closeProjectModal);
+    projectModal.addEventListener("mousedown", (event) => {
+      if (event.target === projectModal) {
+        closeProjectModal();
+      }
+    });
+
+    modalInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        const title = modalInput.value.trim();
+
+        if (!title) {
+          closeNameModal(null);
+          return;
+        }
+
+        if (!modalDescriptionInput.classList.contains("hidden-field")) {
+          closeNameModal({
+            title,
+            description: modalDescriptionInput.value.trim()
+          });
+          return;
+        }
+
+        closeNameModal(title);
+      }
+
+      if (event.key === "Escape") {
+        closeNameModal(null);
+      }
+    });
+
+    nameModal.addEventListener("mousedown", (event) => {
+      if (event.target === nameModal) {
+        closeNameModal(null);
+      }
+    });
+
+    function showAlert(message, title = "Avviso") {
+      alertTitle.textContent = title;
+      alertMessage.textContent = message;
+      alertModal.classList.add("open");
+    }
+
+    alertOkBtn.addEventListener("click", () => {
+      alertModal.classList.remove("open");
+    });
+
+    alertModal.addEventListener("mousedown", (event) => {
+      if (event.target === alertModal) {
+        alertModal.classList.remove("open");
+      }
+    });
+
+    function openPositionEditor(position, options = {}) {
+      editingPositionId = position.id || position.positionId;
+      editingFlowNodeId = options.flowNodeId || null;
+      positionTitleInput.value = position.name || "";
+      positionDescriptionInput.value = position.description || "";
+      positionAnglesGrid.innerHTML = "";
+
+      position.angles.forEach((angle, index) => {
+        const field = document.createElement("div");
+        field.className = "position-angle-field";
+        field.innerHTML = `
+          <label for="position-angle-${index}">Servo ${index + 1}</label>
+          <input id="position-angle-${index}" type="number" min="0" max="${getServoMaxAngle(index + 1)}" value="${clampServoAngle(index + 1, angle)}">
+        `;
+        positionAnglesGrid.appendChild(field);
+      });
+
+      positionModal.classList.add("open");
+      setTimeout(() => {
+        positionTitleInput.focus();
+        positionTitleInput.select();
+      }, 30);
+    }
+
+    function closePositionEditor() {
+      positionModal.classList.remove("open");
+      editingPositionId = null;
+      editingFlowNodeId = null;
+    }
+
+    function saveEditedPosition() {
+      if (!editingPositionId) return;
+
+      const savedPosition = savedPositions.find((item) => item.id === editingPositionId);
+
+      const nextName = positionTitleInput.value.trim();
+      if (!nextName) {
+        showAlert("Inserisci un titolo per la posizione.", "Titolo mancante");
+        return;
+      }
+
+      const nextAngles = [];
+      for (let index = 0; index < 6; index++) {
+        const input = document.getElementById(`position-angle-${index}`);
+        const value = Math.round(Number(input.value));
+        const maxAngle = getServoMaxAngle(index + 1);
+
+        if (!Number.isFinite(value) || value < 0 || value > maxAngle) {
+          showAlert(`L'angolo del Servo ${index + 1} deve essere tra 0 e ${maxAngle}.`, "Angolo non valido");
+          return;
+        }
+
+        nextAngles.push(clampServoAngle(index + 1, value));
+      }
+
+      const updatedPosition = savedPosition || {
+        id: editingPositionId,
+        name: nextName,
+        description: positionDescriptionInput.value.trim(),
+        angles: nextAngles
+      };
+
+      updatedPosition.name = nextName;
+      updatedPosition.description = positionDescriptionInput.value.trim();
+      updatedPosition.angles = nextAngles;
+      updatedPosition.updatedAt = new Date().toISOString();
+
+      if (editingFlowNodeId) {
+        const editedNode = flowNodes.find((node) => node.id === editingFlowNodeId);
+        if (editedNode) {
+          editedNode.name = updatedPosition.name;
+          editedNode.description = updatedPosition.description || "";
+          editedNode.angles = [...updatedPosition.angles];
+        }
+      }
+
+      syncPositionEverywhere(updatedPosition);
+
+      if (savedPosition) savePositionsToStorage();
+      saveSequencesToStorage();
+      renderSavedPositions();
+      renderSavedSequences();
+      renderFlow();
+      closePositionEditor();
+    }
+
+    function syncPositionEverywhere(updatedPosition) {
+      flowNodes.forEach((node) => {
+        if (node.positionId === updatedPosition.id) {
+          node.name = updatedPosition.name;
+          node.description = updatedPosition.description || "";
+          node.angles = [...updatedPosition.angles];
+        }
+      });
+
+      savedSequences.forEach((sequence) => {
+        if (!Array.isArray(sequence.nodes)) return;
+
+        sequence.nodes.forEach((node) => {
+          if (node.positionId === updatedPosition.id) {
+            node.name = updatedPosition.name;
+            node.description = updatedPosition.description || "";
+            node.angles = [...updatedPosition.angles];
+          }
+        });
+      });
+    }
+
+    positionCancelBtn.addEventListener("click", closePositionEditor);
+    positionSaveBtn.addEventListener("click", saveEditedPosition);
+
+    positionModal.addEventListener("mousedown", (event) => {
+      if (event.target === positionModal) {
+        closePositionEditor();
+      }
+    });
+
+    function getServoMaxAngle(servoId) {
+      const servo = servos.find((item) => item.id === servoId);
+      return servo?.maxAngle ?? 180;
+    }
+
+    function clampServoAngle(servoId, angle) {
+      const maxAngle = getServoMaxAngle(servoId);
+      return Math.max(0, Math.min(maxAngle, Math.round(Number(angle))));
+    }
+
+    function angleToPercent(angle, maxAngle = 180) {
+      return Math.round((Number(angle) / maxAngle) * 100);
+    }
+
+    function speedSliderToDelay(value) {
+      const minDelay = 0;
+      const maxDelay = 40;
+      return Math.round(maxDelay - (value / 100) * (maxDelay - minDelay));
+    }
+
+    function formatTime() {
+      return new Date().toLocaleTimeString("it-IT", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      });
+    }
+
+    function addLog(direction, message) {
+      const entries = [];
+
+      logBoxes.forEach((box) => {
+        const entry = document.createElement("div");
+        entry.className = `log-entry log-entry-${direction.toLowerCase()}`;
+
+        const time = document.createElement("span");
+        time.className = "log-time";
+        time.textContent = formatTime();
+
+        const command = document.createElement("span");
+        command.className = "log-command";
+        command.textContent = `${direction}  ${message}`;
+
+        entry.appendChild(time);
+        entry.appendChild(command);
+        box.appendChild(entry);
+
+        box.scrollTop = box.scrollHeight;
+        entries.push(entry);
+      });
+
+      return entries;
+    }
+
+    function updateLogEntries(entries, direction, message) {
+      entries.forEach((entry) => {
+        const time = entry.querySelector(".log-time");
+        const command = entry.querySelector(".log-command");
+
+        if (time) time.textContent = formatTime();
+        if (command) command.textContent = `${direction}  ${message}`;
+
+        const box = entry.parentElement;
+        if (box) box.scrollTop = box.scrollHeight;
+      });
+    }
+
+    function clearAllLogs() {
+      logBoxes.forEach((box) => {
+        box.innerHTML = "";
+      });
+    }
+
+    async function sleepWithCountdown(seconds) {
+      const totalSeconds = Math.max(0, Math.round(Number(seconds)));
+
+      if (totalSeconds <= 0) return;
+
+      const entries = addLog("SYS", `TIMER ${totalSeconds} (${totalSeconds})`);
+
+      for (let remaining = totalSeconds - 1; remaining >= 0; remaining--) {
+        await sleep(1000);
+        updateLogEntries(entries, "SYS", `TIMER ${totalSeconds} (${remaining})`);
+      }
+    }
+
+    function updateSliderBackground(slider) {
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const value = Number(slider.value);
+      const percent = ((value - min) / (max - min)) * 100;
+
+      slider.style.background =
+        `linear-gradient(to right, var(--blue) 0%, var(--blue) ${percent}%, #e5e7eb ${percent}%, #e5e7eb 100%)`;
+    }
+
+    function updateSpeedSliderBackground() {
+      const value = speedSlider.value;
+      speedSlider.style.background =
+        `linear-gradient(to right, var(--blue) 0%, var(--blue) ${value}%, #374151 ${value}%, #374151 100%)`;
+    }
+
+    function updateServoUI(servoId, angle) {
+      const maxAngle = getServoMaxAngle(servoId);
+      const safeAngle = clampServoAngle(servoId, angle);
+      const percent = angleToPercent(safeAngle, maxAngle);
+
+      const slider = document.getElementById(`slider-${servoId}`);
+      const badge = document.getElementById(`badge-${servoId}`);
+      const angleText = document.getElementById(`angle-${servoId}`);
+
+      if (!slider || !badge || !angleText) return;
+
+      slider.value = safeAngle;
+      badge.textContent = `${percent}%`;
+      angleText.textContent = `Angolo: ${safeAngle}°`;
+      updateSliderBackground(slider);
+    }
+
+    function getCurrentAngles() {
+      return servos.map((servo) => {
+        const slider = document.getElementById(`slider-${servo.id}`);
+        return clampServoAngle(servo.id, slider.value);
+      });
+    }
+
+    function applyPoseToUI(angles) {
+      angles.forEach((angle, index) => updateServoUI(index + 1, angle));
+    }
+
+    async function changeServoAngleBy(servoId, delta) {
+      const slider = document.getElementById(`slider-${servoId}`);
+      if (!slider) return;
+
+      const currentAngle = Math.round(Number(slider.value));
+      const nextAngle = clampServoAngle(servoId, currentAngle + delta);
+
+      updateServoUI(servoId, nextAngle);
+      await sendCurrentPose();
+    }
+
+    async function sendRawCommand(command) {
+      const line = `${command}\n`;
+
+      if (simulationMode) {
+        addLog("TX", command);
+
+        if (command.startsWith("POSE")) {
+          setTimeout(() => {
+            handleArduinoLine("MOVE_DONE");
+          }, 500);
+        }
+
+        return;
+      }
+
+      if (!writer) {
+        showAlert("Arduino non connesso.", "Connessione richiesta");
+        return;
+      }
+
+      try {
+        const encoder = new TextEncoder();
+        await writer.write(encoder.encode(line));
+        addLog("TX", command);
+      } catch (error) {
+        console.error(error);
+        showAlert("Errore durante l’invio del comando ad Arduino.", "Errore seriale");
+      }
+    }
+
+    async function sendPoseCommand(angles) {
+      const safeAngles = angles.map((angle, index) => clampServoAngle(index + 1, angle));
+      await sendRawCommand(`POSE ${safeAngles.join(" ")}`);
+    }
+
+    async function sendCurrentPose() {
+      await sendPoseCommand(getCurrentAngles());
+    }
+
+    async function sendSpeedDelay() {
+      await sendRawCommand(`SPEED ${speedDelay}`);
+    }
+
+    async function moveToHomePosition() {
+      await sendSpeedDelay();
+      const homeAngles = servos.map((servo) => servo.homeAngle);
+      applyPoseToUI(homeAngles);
+      await sendPoseCommand(homeAngles);
+    }
+
+    async function startSerialReading() {
+      if (!port || !port.readable) return;
+
+      try {
+        const decoder = new TextDecoderStream();
+        port.readable.pipeTo(decoder.writable);
+        reader = decoder.readable.getReader();
+
+        while (true) {
+          const { value, done } = await reader.read();
+
+          if (done) break;
+          if (!value) continue;
+
+          serialBuffer += value;
+
+          let newlineIndex;
+
+          while ((newlineIndex = serialBuffer.indexOf("\n")) >= 0) {
+            const line = serialBuffer.slice(0, newlineIndex).trim();
+            serialBuffer = serialBuffer.slice(newlineIndex + 1);
+            handleArduinoLine(line);
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    function handleArduinoLine(line) {
+      if (!line) return;
+
+      if (line === "MOVE_DONE") {
+        if (sequenceRunning) {
+          addLog("RX", line);
+        }
+
+        if (moveDoneResolver) {
+          moveDoneResolver();
+          moveDoneResolver = null;
+        }
+
+        return;
+      }
+
+      addLog("RX", line);
+    }
+
+    function waitForMoveDone(timeoutMs = 30000) {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          moveDoneResolver = null;
+          reject(new Error("Timeout: Arduino non ha inviato MOVE_DONE."));
+        }, timeoutMs);
+
+        moveDoneResolver = () => {
+          clearTimeout(timeout);
+          resolve();
+        };
+      });
+    }
+
+    function savePositionsToStorage() {
+      localStorage.setItem("savedPositions", JSON.stringify(savedPositions));
+    }
+
+    function saveSequencesToStorage() {
+      localStorage.setItem("savedSequences", JSON.stringify(savedSequences));
+    }
+
+    async function saveCurrentPosition() {
+      const angles = getCurrentAngles();
+
+      const details = await askSequenceDetails({
+        title: "Salva posizione",
+        description: "Dai un titolo e una descrizione alla posizione attuale del braccio.",
+        defaultTitle: `Posizione ${savedPositions.length + 1}`,
+        defaultDescription: ""
+      });
+
+      if (!details) return;
+
+      savedPositions.push({
+        id: crypto.randomUUID(),
+        name: details.title,
+        description: details.description,
+        angles,
+        createdAt: new Date().toISOString()
+      });
+
+      savePositionsToStorage();
+      renderSavedPositions();
+    }
+
+    function formatAngles(angles) {
+      return angles.map((angle, index) => `S${index + 1}: ${angle}°`).join(" · ");
+    }
+
+    function getBlockColorClass(index) {
+      const colors = ["block-blue", "block-green", "block-orange", "block-purple", "block-red", "block-cyan"];
+      return colors[index % colors.length];
+    }
+
+    function updateSequenceStylePreview() {
+      if (sequenceBadgePreview) {
+        sequenceBadgePreview.innerHTML = getIconSvg(selectedSequenceIcon);
+        sequenceBadgePreview.style.background = selectedSequenceColor;
+        sequenceBadgePreview.style.boxShadow = `0 10px 22px ${selectedSequenceColor}44`;
+      }
+    }
+
+    function setSequenceStyle({ icon = "arm", color = "#2563eb" } = {}) {
+      selectedSequenceIcon = icon;
+      selectedSequenceColor = color;
+      updateSequenceStylePreview();
+    }
+
+    function getSequenceStyle() {
+      return {
+        icon: selectedSequenceIcon,
+        color: selectedSequenceColor
+      };
+    }
+
+    function renderStylePicker() {
+      if (!styleColorGrid || !styleIconGrid || !stylePickerPreview) return;
+
+      stylePickerPreview.innerHTML = getIconSvg(draftSequenceIcon);
+      stylePickerPreview.style.background = draftSequenceColor;
+      stylePickerPreview.style.boxShadow = `0 12px 24px ${draftSequenceColor}44`;
+
+      styleColorGrid.innerHTML = "";
+      sequenceColors.forEach((color) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `color-choice${color === draftSequenceColor ? " selected" : ""}`;
+        btn.style.background = color;
+        btn.title = color;
+        btn.addEventListener("click", () => {
+          draftSequenceColor = color;
+          renderStylePicker();
+        });
+        styleColorGrid.appendChild(btn);
+      });
+
+      styleIconGrid.innerHTML = "";
+      sequenceIcons.forEach((icon) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = `icon-choice${icon === draftSequenceIcon ? " selected" : ""}`;
+        btn.innerHTML = getIconSvg(icon);
+        btn.title = icon;
+        btn.addEventListener("click", () => {
+          draftSequenceIcon = icon;
+          renderStylePicker();
+        });
+        styleIconGrid.appendChild(btn);
+      });
+    }
+
+    function openStylePicker() {
+      draftSequenceIcon = selectedSequenceIcon;
+      draftSequenceColor = selectedSequenceColor;
+      renderStylePicker();
+      stylePickerModal.classList.add("open");
+    }
+
+    function closeStylePicker() {
+      stylePickerModal.classList.remove("open");
+    }
+
+    function applyStylePicker() {
+      setSequenceStyle({ icon: draftSequenceIcon, color: draftSequenceColor });
+      closeStylePicker();
+    }
+
+    function removePositionDragPreview() {
+      if (positionDragPreview) {
+        positionDragPreview.remove();
+        positionDragPreview = null;
+      }
+    }
+
+    function updatePositionDragPreview(clientX, clientY) {
+      if (!positionDragPreview) return;
+      positionDragPreview.style.left = `${clientX - positionDragOffsetX}px`;
+      positionDragPreview.style.top = `${clientY - positionDragOffsetY}px`;
+    }
+
+    function isPointerOverFlowViewport(clientX, clientY) {
+      if (!flowViewport) return false;
+      const rect = flowViewport.getBoundingClientRect();
+      return (
+        clientX >= rect.left &&
+        clientX <= rect.right &&
+        clientY >= rect.top &&
+        clientY <= rect.bottom
+      );
+    }
+
+    function onPaletteDragMove(event) {
+      if (!paletteDraggingPositionId) return;
+      updatePositionDragPreview(event.clientX, event.clientY);
+      if (flowViewport) {
+        flowViewport.classList.toggle(
+          "palette-drag-over",
+          isPointerOverFlowViewport(event.clientX, event.clientY)
+        );
+      }
+    }
+
+    function onPaletteDragEnd(event) {
+      document.removeEventListener("mousemove", onPaletteDragMove);
+      document.removeEventListener("mouseup", onPaletteDragEnd);
+      if (!paletteDraggingPositionId) return;
+      finishPaletteDrag(event);
+    }
+
+    function startPaletteDrag(position, index, block, event) {
+      if (event.button !== 0) return;
+
+      document.removeEventListener("mousemove", onPaletteDragMove);
+      document.removeEventListener("mouseup", onPaletteDragEnd);
+
+      paletteDraggingPositionId = position.id;
+      removePositionDragPreview();
+
+      positionDragPreview = document.createElement("div");
+      positionDragPreview.className = `position-drag-floater flow-node ${getBlockColorClass(index)}`;
+      const label = document.createElement("strong");
+      label.textContent = position.name;
+      positionDragPreview.appendChild(label);
+      document.body.appendChild(positionDragPreview);
+
+      updatePositionDragPreview(event.clientX, event.clientY);
+
+      const previewRect = positionDragPreview.getBoundingClientRect();
+      positionDragOffsetX = previewRect.width / 2;
+      positionDragOffsetY = previewRect.height / 2;
+
+      block.classList.add("is-dragging");
+      document.body.classList.add("palette-dragging");
+
+      document.addEventListener("mousemove", onPaletteDragMove);
+      document.addEventListener("mouseup", onPaletteDragEnd);
+    }
+
+    function finishPaletteDrag(event) {
+      const positionId = paletteDraggingPositionId;
+      const centerOffsetX = positionDragOffsetX;
+      const centerOffsetY = positionDragOffsetY;
+
+      paletteDraggingPositionId = null;
+      removePositionDragPreview();
+      document.body.classList.remove("palette-dragging");
+      if (flowViewport) flowViewport.classList.remove("palette-drag-over");
+
+      document.querySelectorAll(".position-block.is-dragging").forEach((item) => {
+        item.classList.remove("is-dragging");
+      });
+
+      if (!positionId || !isPointerOverFlowViewport(event.clientX, event.clientY)) return;
+
+      const position = savedPositions.find((item) => item.id === positionId);
+      if (!position) return;
+
+      const worldPoint = viewportToWorld(event.clientX, event.clientY);
+      createFlowNodeFromPosition(
+        position,
+        worldPoint.x - centerOffsetX / view.scale,
+        worldPoint.y - centerOffsetY / view.scale
+      );
+    }
+
+    function animateNodeDeleteToTrash(element, nodeId) {
+      if (!element || !trashDropzone) {
+        deleteFlowNode(nodeId);
+        return;
+      }
+
+      const rect = element.getBoundingClientRect();
+      if (!rect.width && !rect.height) {
+        deleteFlowNode(nodeId);
+        return;
+      }
+
+      const clone = element.cloneNode(true);
+      clone.classList.add("flow-trash-anim", "flow-node");
+      clone.querySelectorAll(".node-port, .node-edit-icon").forEach((item) => item.remove());
+
+      clone.style.position = "fixed";
+      clone.style.left = `${rect.left}px`;
+      clone.style.top = `${rect.top}px`;
+      clone.style.width = `${rect.width}px`;
+      clone.style.height = `${rect.height}px`;
+      clone.style.margin = "0";
+      clone.style.zIndex = "200000";
+      clone.style.pointerEvents = "none";
+      clone.style.transform = "translate(0, 0) scale(1)";
+      clone.style.opacity = "1";
+      clone.style.transition = "none";
+
+      element.style.visibility = "hidden";
+      document.body.appendChild(clone);
+
+      const trashRect = trashDropzone.getBoundingClientRect();
+      const translateX = (trashRect.left + trashRect.width / 2) - (rect.left + rect.width / 2);
+      const translateY = (trashRect.top + trashRect.height / 2) - (rect.top + rect.height / 2);
+
+      let finished = false;
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        clone.remove();
+        deleteFlowNode(nodeId);
+      };
+
+      const animation = clone.animate(
+        [
+          { transform: "translate(0, 0) scale(1)", opacity: 1 },
+          { transform: `translate(${translateX}px, ${translateY}px) scale(0.12)`, opacity: 0 }
+        ],
+        {
+          duration: 340,
+          easing: "cubic-bezier(0.34, 1.1, 0.48, 1)",
+          fill: "forwards"
+        }
+      );
+
+      animation.onfinish = finish;
+      animation.oncancel = finish;
+      window.setTimeout(finish, 420);
+    }
+
+    function renderSavedPositions() {
+      savedPositionsBox.innerHTML = "";
+
+      if (savedPositions.length === 0) {
+        savedPositionsBox.innerHTML = `<div class="empty-state">Nessuna posizione salvata.</div>`;
+        return;
+      }
+
+      savedPositions.forEach((position, index) => {
+        const block = document.createElement("div");
+        block.className = `position-block ${getBlockColorClass(index)}`;
+
+        const description = position.description?.trim() || "";
+        const descriptionHtml = description ? `<div class="position-meta">${description}</div>` : "";
+        if (!description) block.classList.add("no-description");
+
+        block.innerHTML = `
+          <button class="position-edit-icon" type="button" title="Modifica posizione" aria-label="Modifica posizione">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+          </button>
+          <strong>${position.name}</strong>
+          ${descriptionHtml}
+          <div class="position-actions">
+            <button class="position-run-btn" type="button">Esegui</button>
+            <button class="position-delete-btn" type="button">Elimina</button>
+          </div>
+        `;
+
+        block.addEventListener("mousedown", (event) => {
+          if (event.target.closest("button")) return;
+          event.preventDefault();
+          startPaletteDrag(position, index, block, event);
+        });
+
+        block.querySelector(".position-edit-icon").addEventListener("click", (event) => {
+          event.stopPropagation();
+          openPositionEditor(position);
+        });
+
+        block.querySelector(".position-run-btn").addEventListener("click", async (event) => {
+          event.stopPropagation();
+          applyPoseToUI(position.angles);
+          await sendPoseCommand(position.angles);
+        });
+
+        block.querySelector(".position-delete-btn").addEventListener("click", (event) => {
+          event.stopPropagation();
+          savedPositions = savedPositions.filter((item) => item.id !== position.id);
+          savePositionsToStorage();
+          renderSavedPositions();
+        });
+
+        savedPositionsBox.appendChild(block);
+      });
+    }
+
+    function applyFlowTransform() {
+      flowWorld.style.transform = `translate(${view.x}px, ${view.y}px) scale(${view.scale})`;
+      zoomLabel.textContent = `${Math.round(view.scale * 100)}%`;
+    }
+
+    function viewportToWorld(clientX, clientY) {
+      const rect = flowViewport.getBoundingClientRect();
+
+      return {
+        x: (clientX - rect.left - view.x) / view.scale,
+        y: (clientY - rect.top - view.y) / view.scale
+      };
+    }
+
+    function createFlowNodeFromPosition(position, x, y) {
+      const index = savedPositions.findIndex((item) => item.id === position.id);
+
+      flowNodes.push({
+        id: crypto.randomUUID(),
+        positionId: position.id,
+        name: position.name,
+        description: position.description || "",
+        angles: [...position.angles],
+        x,
+        y,
+        colorClass: getBlockColorClass(index)
+      });
+
+      renderFlow();
+    }
+
+    function renderFlow() {
+      flowWorld.querySelectorAll(".flow-node").forEach((node) => node.remove());
+      flowWorld.querySelectorAll(".edge-delay-input").forEach((input) => input.remove());
+      flowSvg.querySelectorAll(".edge-path").forEach((edge) => edge.remove());
+
+      flowNodes.forEach((node) => {
+        const element = document.createElement("div");
+        element.className = `flow-node ${node.colorClass}`;
+        element.dataset.nodeId = node.id;
+        element.style.left = `${node.x}px`;
+        element.style.top = `${node.y}px`;
+
+        element.innerHTML = `
+          <div class="node-port input" data-port="input"></div>
+          <strong>${node.name}</strong>
+          <button class="node-edit-icon" type="button" title="Modifica posizione" aria-label="Modifica posizione">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+          </button>
+          <div class="node-port output" data-port="output"></div>
+        `;
+
+        element.addEventListener("mousedown", (event) => {
+          if (event.target.classList.contains("node-port") || event.target.closest(".node-edit-icon")) return;
+
+          event.stopPropagation();
+
+          draggingNodeId = node.id;
+          nodeDragStart = viewportToWorld(event.clientX, event.clientY);
+          nodeStart = { x: node.x, y: node.y };
+          element.classList.add("dragging");
+
+          const currentFlowCard = element.closest(".flow-card");
+          if (currentFlowCard) currentFlowCard.classList.add("node-dragging-active");
+          if (flowViewport) flowViewport.classList.add("node-dragging-active");
+        });
+
+        element.querySelector(".node-edit-icon").addEventListener("click", (event) => {
+          event.stopPropagation();
+
+          const sourcePosition = savedPositions.find((position) => position.id === node.positionId) || {
+            id: node.positionId,
+            name: node.name,
+            description: node.description || "",
+            angles: [...node.angles]
+          };
+
+          openPositionEditor(sourcePosition, { flowNodeId: node.id });
+        });
+
+        flowWorld.appendChild(element);
+      });
+
+      renderEdges();
+    }
+
+    function buildEdgePathD(start, end) {
+      const gapX = end.x - start.x;
+      const gapY = end.y - start.y;
+      const absX = Math.abs(gapX);
+      const absY = Math.abs(gapY);
+      const distance = Math.hypot(gapX, gapY);
+
+      if (gapX <= 8) {
+        const bulge = Math.max(42, Math.min(90, distance * 0.42));
+        const side = gapY >= 0 ? 1 : -1;
+        const spread = Math.max(56, absX + 48);
+        return `M ${start.x} ${start.y} C ${start.x + spread} ${start.y - side * bulge}, ${end.x - spread} ${end.y + side * bulge}, ${end.x} ${end.y}`;
+      }
+
+      if (absX < 170) {
+        if (absY < 28) {
+          const bow = Math.min(18, absX * 0.14);
+          const midX = (start.x + end.x) / 2;
+          return `M ${start.x} ${start.y} Q ${midX} ${start.y - bow}, ${end.x} ${end.y}`;
+        }
+
+        const bump = Math.max(26, Math.min(58, absX * 0.32 + absY * 0.22));
+        const side = gapY >= 0 ? 1 : -1;
+        const dx = Math.max(22, absX * 0.38);
+        return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y + side * bump}, ${end.x - dx} ${end.y + side * bump}, ${end.x} ${end.y}`;
+      }
+
+      const dx = Math.max(48, Math.min(110, absX * 0.45));
+
+      if (absY < 36) {
+        return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y}, ${end.x - dx} ${end.y}, ${end.x} ${end.y}`;
+      }
+
+      const lean = gapY * 0.18;
+      return `M ${start.x} ${start.y} C ${start.x + dx} ${start.y + lean}, ${end.x - dx} ${end.y - lean}, ${end.x} ${end.y}`;
+    }
+
+    function getEdgeLabelPosition(start, end) {
+      const gapX = end.x - start.x;
+      const absX = Math.abs(gapX);
+      const absY = Math.abs(end.y - start.y);
+
+      if (absX < 170 && absY < 28) {
+        return {
+          x: (start.x + end.x) / 2,
+          y: Math.min(start.y, end.y) - 30
+        };
+      }
+
+      return {
+        x: (start.x + end.x) / 2,
+        y: (start.y + end.y) / 2 - 18
+      };
+    }
+
+    function getNodePoint(node, side) {
+      const element = document.querySelector(`[data-node-id="${node.id}"]`);
+      const fallbackWidth = 160;
+      const fallbackHeight = 54;
+      const scale = view.scale || 1;
+
+      if (!element || !flowWorld) {
+        const y = node.y + fallbackHeight / 2;
+        return side === "right"
+          ? { x: node.x + fallbackWidth, y }
+          : { x: node.x, y };
+      }
+
+      const port = element.querySelector(side === "right" ? ".node-port.output" : ".node-port.input");
+
+      if (port) {
+        const worldRect = flowWorld.getBoundingClientRect();
+        const portRect = port.getBoundingClientRect();
+        return {
+          x: (portRect.left + portRect.width / 2 - worldRect.left) / scale,
+          y: (portRect.top + portRect.height / 2 - worldRect.top) / scale
+        };
+      }
+
+      const width = element.offsetWidth;
+      const height = element.offsetHeight;
+      const y = node.y + height / 2;
+      return side === "right"
+        ? { x: node.x + width, y }
+        : { x: node.x, y };
+    }
+
+    function renderEdges() {
+      flowSvg.querySelectorAll(".edge-path").forEach((edge) => edge.remove());
+      flowWorld.querySelectorAll(".edge-delay-input").forEach((input) => input.remove());
+
+      flowEdges.forEach((edge) => {
+        const fromNode = flowNodes.find((node) => node.id === edge.from);
+        const toNode = flowNodes.find((node) => node.id === edge.to);
+
+        if (!fromNode || !toNode) return;
+
+        const start = getNodePoint(fromNode, "right");
+        const end = getNodePoint(toNode, "left");
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.classList.add("edge-path");
+        path.setAttribute("d", buildEdgePathD(start, end));
+        path.setAttribute("fill", "none");
+        path.setAttribute("stroke", "#93c5fd");
+        path.setAttribute("stroke-width", "3");
+        path.setAttribute("stroke-linecap", "round");
+        path.setAttribute("marker-end", "url(#arrowHead)");
+
+        flowSvg.appendChild(path);
+
+        const labelPos = getEdgeLabelPosition(start, end);
+
+        const delayInput = document.createElement("input");
+        delayInput.className = "edge-delay-input";
+        delayInput.type = "number";
+        delayInput.min = "0";
+        delayInput.step = "1";
+        delayInput.value = Math.round(Number(edge.delaySeconds ?? 1));
+        delayInput.title = "Secondi di attesa dopo MOVE_DONE";
+        delayInput.style.left = `${labelPos.x}px`;
+        delayInput.style.top = `${labelPos.y}px`;
+
+        delayInput.addEventListener("mousedown", (event) => {
+          event.stopPropagation();
+        });
+
+        delayInput.addEventListener("wheel", (event) => {
+          event.stopPropagation();
+        });
+
+        delayInput.addEventListener("input", () => {
+          const value = Number(delayInput.value);
+          edge.delaySeconds = Number.isFinite(value) && value >= 0 ? Math.round(value) : 0;
+        });
+
+        flowWorld.appendChild(delayInput);
+      });
+    }
+
+    function resetFlowMetadata() {
+      currentEditingSequenceId = null;
+      if (flowTitleInput) flowTitleInput.value = `Nuova sequenza`;
+      if (flowDescriptionInput) flowDescriptionInput.value = "";
+      setSequenceStyle({ icon: "arm", color: "#2563eb" });
+    }
+
+    function clearFlow() {
+      flowNodes = [];
+      flowEdges = [];
+      pendingConnectionFrom = null;
+      resetFlowMetadata();
+      renderFlow();
+    }
+
+    async function saveCurrentSequence() {
+      if (flowNodes.length === 0) {
+        showAlert("Non puoi salvare una sequenza vuota.", "Sequenza vuota");
+        return;
+      }
+
+      const title = flowTitleInput.value.trim();
+      const description = flowDescriptionInput.value.trim();
+      const sequenceStyle = getSequenceStyle();
+
+      if (!title) {
+        showAlert("Inserisci un titolo per la sequenza.", "Titolo mancante");
+        flowTitleInput.focus();
+        return;
+      }
+
+      if (currentEditingSequenceId) {
+        const sequence = savedSequences.find((item) => item.id === currentEditingSequenceId);
+
+        if (sequence) {
+          sequence.name = title;
+          sequence.description = description;
+          sequence.icon = sequenceStyle.icon;
+          sequence.color = sequenceStyle.color;
+          sequence.nodes = structuredClone(flowNodes);
+          sequence.edges = structuredClone(flowEdges);
+          sequence.updatedAt = new Date().toISOString();
+        } else {
+          currentEditingSequenceId = null;
+        }
+      }
+
+      if (!currentEditingSequenceId) {
+        const newSequence = {
+          id: crypto.randomUUID(),
+          name: title,
+          description,
+          icon: sequenceStyle.icon,
+          color: sequenceStyle.color,
+          nodes: structuredClone(flowNodes),
+          edges: structuredClone(flowEdges),
+          createdAt: new Date().toISOString()
+        };
+
+        savedSequences.push(newSequence);
+        currentEditingSequenceId = newSequence.id;
+      }
+
+      saveSequencesToStorage();
+      renderSavedSequences();
+    }
+
+    function renderSavedSequences() {
+      savedSequencesBox.innerHTML = "";
+
+      if (savedSequences.length === 0) {
+        savedSequencesBox.innerHTML = `<div class="empty-state">Nessuna sequenza salvata.</div>`;
+        return;
+      }
+
+      savedSequences.forEach((sequence, index) => {
+        const block = document.createElement("div");
+        block.className = "saved-sequence-block";
+
+        const description = sequence.description?.trim() || "";
+        const descriptionHtml = description ? `<div class="saved-sequence-description">${description}</div>` : "";
+        if (!description) block.classList.add("no-description");
+        const sequenceColor = sequence.color || "#2563eb";
+        const sequenceIcon = sequence.icon || "arm";
+        block.style.setProperty("--sequence-color", sequenceColor);
+
+        block.innerHTML = `
+          <div class="saved-sequence-top">
+            <div class="saved-sequence-icon">${getIconSvg(sequenceIcon)}</div>
+            <div class="saved-sequence-title">
+              <strong>${sequence.name}</strong>
+              ${descriptionHtml}
+            </div>
+          </div>
+
+          <button class="sequence-edit-icon" type="button" title="Modifica sequenza" aria-label="Modifica sequenza">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+          </button>
+          <div class="saved-sequence-actions">
+            <button class="run-saved-sequence-btn" type="button">Esegui</button>
+            <button class="delete-sequence-btn" type="button">Elimina</button>
+          </div>
+        `;
+
+        block.querySelector(".sequence-edit-icon").addEventListener("click", () => {
+          currentEditingSequenceId = sequence.id;
+          flowTitleInput.value = sequence.name || "";
+          flowDescriptionInput.value = sequence.description || "";
+          setSequenceStyle({ icon: sequence.icon || "arm", color: sequence.color || "#2563eb" });
+          flowNodes = structuredClone(sequence.nodes || []);
+          flowEdges = structuredClone(sequence.edges || []).map((edge) => ({
+            ...edge,
+            delaySeconds: Math.round(Number(edge.delaySeconds ?? 1))
+          }));
+          renderFlow();
+        });
+
+        block.querySelector(".run-saved-sequence-btn").addEventListener("click", async () => {
+          await runSavedSequence(sequence);
+        });
+
+        block.querySelector(".delete-sequence-btn").addEventListener("click", () => {
+          savedSequences = savedSequences.filter((item) => item.id !== sequence.id);
+          saveSequencesToStorage();
+          renderSavedSequences();
+        });
+
+        savedSequencesBox.appendChild(block);
+      });
+    }
+
+    function getExecutionPlanFrom(nodes, edges) {
+      if (nodes.length === 0) return [];
+
+      const incomingCount = new Map(nodes.map((node) => [node.id, 0]));
+
+      edges.forEach((edge) => {
+        incomingCount.set(edge.to, (incomingCount.get(edge.to) || 0) + 1);
+      });
+
+      const startNodes = nodes.filter((node) => incomingCount.get(node.id) === 0);
+
+      if (startNodes.length !== 1) {
+        showAlert("La sequenza deve avere un solo blocco iniziale, cioè un solo blocco senza frecce entranti.", "Sequenza non valida");
+        return [];
+      }
+
+      const plan = [];
+      const visited = new Set();
+      let current = startNodes[0];
+
+      while (current) {
+        if (visited.has(current.id)) {
+          showAlert("La sequenza contiene un ciclo. Per ora i cicli non sono supportati.", "Ciclo rilevato");
+          return [];
+        }
+
+        visited.add(current.id);
+
+        const outgoing = edges.filter((edge) => edge.from === current.id);
+
+        if (outgoing.length > 1) {
+          showAlert("Per ora l’esecuzione supporta solo una uscita per blocco.", "Ramo non supportato");
+          return [];
+        }
+
+        const nextEdge = outgoing[0] || null;
+
+        plan.push({
+          node: current,
+          delayAfterSeconds: nextEdge ? Math.round(Number(nextEdge.delaySeconds ?? 1)) : 0
+        });
+
+        if (!nextEdge) {
+          current = null;
+        } else {
+          current = nodes.find((node) => node.id === nextEdge.to);
+        }
+      }
+
+      return plan;
+    }
+
+    function getExecutionPlan() {
+      return getExecutionPlanFrom(flowNodes, flowEdges);
+    }
+
+    async function executePlan(plan) {
+      if (plan.length === 0) return;
+
+      sequenceRunning = true;
+
+      try {
+        await sendSpeedDelay();
+
+        for (const step of plan) {
+          applyPoseToUI(step.node.angles);
+          await sendPoseCommand(step.node.angles);
+
+          try {
+            await waitForMoveDone();
+          } catch (error) {
+            showAlert(error.message, "Esecuzione interrotta");
+            return;
+          }
+
+          if (step.delayAfterSeconds > 0) {
+            await sleepWithCountdown(step.delayAfterSeconds);
+          }
+        }
+      } finally {
+        sequenceRunning = false;
+      }
+    }
+
+    async function runSavedSequence(sequence) {
+      const nodes = structuredClone(sequence.nodes || []);
+      const edges = structuredClone(sequence.edges || []).map((edge) => ({
+        ...edge,
+        delaySeconds: Math.round(Number(edge.delaySeconds ?? 1))
+      }));
+
+      const plan = getExecutionPlanFrom(nodes, edges);
+      await executePlan(plan);
+    }
+
+    async function runSequence() {
+      const plan = getExecutionPlan();
+      await executePlan(plan);
+    }
+
+
+
+    function isPointerOverTrash(event) {
+      if (!trashDropzone) return false;
+
+      const rect = trashDropzone.getBoundingClientRect();
+
+      return (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+      );
+    }
+
+    function deleteFlowNode(nodeId) {
+      flowNodes = flowNodes.filter((item) => item.id !== nodeId);
+      flowEdges = flowEdges.filter((edge) => edge.from !== nodeId && edge.to !== nodeId);
+
+      if (pendingConnectionFrom === nodeId) {
+        pendingConnectionFrom = null;
+      }
+
+      renderFlow();
+    }
+
+    function setupFlowPortConnections() {
+      if (!flowViewport) return;
+
+      flowViewport.addEventListener("click", (event) => {
+        const port = event.target.closest(".node-port");
+        if (!port) return;
+
+        event.stopPropagation();
+
+        const nodeElement = port.closest(".flow-node");
+        if (!nodeElement) return;
+
+        const nodeId = nodeElement.dataset.nodeId;
+
+        if (port.classList.contains("output")) {
+          pendingConnectionFrom = nodeId;
+          document.querySelectorAll(".node-port").forEach((item) => {
+            item.classList.remove("active", "connecting-target");
+          });
+          port.classList.add("active");
+          return;
+        }
+
+        if (port.classList.contains("input") && pendingConnectionFrom && pendingConnectionFrom !== nodeId) {
+          const alreadyExists = flowEdges.some((edge) => edge.from === pendingConnectionFrom && edge.to === nodeId);
+
+          if (!alreadyExists) {
+            flowEdges.push({
+              id: crypto.randomUUID(),
+              from: pendingConnectionFrom,
+              to: nodeId,
+              delaySeconds: 1
+            });
+          }
+
+          pendingConnectionFrom = null;
+          document.querySelectorAll(".node-port").forEach((item) => {
+            item.classList.remove("active", "connecting-target");
+          });
+          renderFlow();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape" || !pendingConnectionFrom) return;
+        pendingConnectionFrom = null;
+        document.querySelectorAll(".node-port").forEach((item) => {
+          item.classList.remove("active", "connecting-target");
+        });
+      });
+    }
+
+    function setupFlowFullscreen() {
+      const flowCard = document.querySelector(".flow-card");
+      if (!flowCard) return;
+
+      let fullscreenBtn = document.getElementById("flowFullscreenBtn");
+      if (!fullscreenBtn) {
+        fullscreenBtn = document.createElement("button");
+        fullscreenBtn.id = "flowFullscreenBtn";
+        fullscreenBtn.className = "flow-fullscreen-btn";
+        fullscreenBtn.type = "button";
+        fullscreenBtn.title = "Ingrandisci foglio centrale";
+        fullscreenBtn.setAttribute("aria-label", "Ingrandisci foglio centrale");
+        fullscreenBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M3 3l7 7"/><path d="M21 3l-7 7"/><path d="M21 21l-7-7"/><path d="M3 21l7-7"/></svg>';
+        flowCard.appendChild(fullscreenBtn);
+      }
+
+      const expandIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5"/><path d="M16 3h5v5"/><path d="M21 16v5h-5"/><path d="M3 16v5h5"/><path d="M3 3l7 7"/><path d="M21 3l-7 7"/><path d="M21 21l-7-7"/><path d="M3 21l7-7"/></svg>';
+      const shrinkIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3v6H3"/><path d="M15 3v6h6"/><path d="M15 21v-6h6"/><path d="M9 21v-6H3"/><path d="M3 9l6-6"/><path d="M21 9l-6-6"/><path d="M21 15l-6 6"/><path d="M3 15l6 6"/></svg>';
+
+      function setFlowFullscreen(enabled) {
+        document.body.classList.toggle("flow-fullscreen-open", enabled);
+        fullscreenBtn.title = enabled ? "Riduci foglio centrale" : "Ingrandisci foglio centrale";
+        fullscreenBtn.setAttribute("aria-label", fullscreenBtn.title);
+        fullscreenBtn.innerHTML = enabled ? shrinkIcon : expandIcon;
+        requestAnimationFrame(() => renderEdges());
+      }
+
+      fullscreenBtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setFlowFullscreen(!document.body.classList.contains("flow-fullscreen-open"));
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && document.body.classList.contains("flow-fullscreen-open")) {
+          setFlowFullscreen(false);
+        }
+      });
+    }
+
+    function setupFlowInteractions() {
+      setupFlowPortConnections();
+
+      flowViewport.addEventListener("mousedown", (event) => {
+        if (event.target !== flowViewport && event.target !== flowWorld && event.target !== flowSvg) return;
+
+        panning = true;
+        flowViewport.classList.add("panning");
+        panStart = { x: event.clientX, y: event.clientY };
+        viewStart = { x: view.x, y: view.y };
+      });
+
+      window.addEventListener("mousemove", (event) => {
+        if (draggingNodeId) {
+          const node = flowNodes.find((item) => item.id === draggingNodeId);
+          if (!node) return;
+
+          const point = viewportToWorld(event.clientX, event.clientY);
+
+          node.x = nodeStart.x + (point.x - nodeDragStart.x);
+          node.y = nodeStart.y + (point.y - nodeDragStart.y);
+
+          const element = document.querySelector(`[data-node-id="${draggingNodeId}"]`);
+          if (element) {
+            element.style.left = `${node.x}px`;
+            element.style.top = `${node.y}px`;
+          }
+
+          if (trashDropzone) {
+            const overTrash = isPointerOverTrash(event);
+            trashDropzone.classList.toggle("drag-over", overTrash);
+            if (element) element.classList.toggle("over-trash", overTrash);
+          }
+
+          renderEdges();
+          return;
+        }
+
+        if (panning) {
+          view.x = viewStart.x + (event.clientX - panStart.x);
+          view.y = viewStart.y + (event.clientY - panStart.y);
+          applyFlowTransform();
+        }
+      });
+
+      window.addEventListener("mouseup", (event) => {
+        if (draggingNodeId) {
+          const nodeId = draggingNodeId;
+          const element = document.querySelector(`[data-node-id="${nodeId}"]`);
+          const shouldDelete = trashDropzone && isPointerOverTrash(event);
+
+          draggingNodeId = null;
+
+          if (element) {
+            element.classList.remove("dragging", "over-trash");
+          }
+
+          if (trashDropzone) {
+            trashDropzone.classList.remove("drag-over");
+          }
+
+          document.querySelectorAll(".flow-card.node-dragging-active").forEach((card) => {
+            card.classList.remove("node-dragging-active");
+          });
+          if (flowViewport) flowViewport.classList.remove("node-dragging-active");
+
+          if (shouldDelete) {
+            animateNodeDeleteToTrash(element, nodeId);
+          }
+        }
+
+        panning = false;
+        flowViewport.classList.remove("panning");
+      });
+
+      flowViewport.addEventListener("wheel", (event) => {
+        event.preventDefault();
+
+        const before = viewportToWorld(event.clientX, event.clientY);
+        const delta = event.deltaY < 0 ? 1.1 : 0.9;
+        const nextScale = Math.max(0.35, Math.min(2.2, view.scale * delta));
+
+        view.scale = nextScale;
+
+        const rect = flowViewport.getBoundingClientRect();
+        view.x = event.clientX - rect.left - before.x * view.scale;
+        view.y = event.clientY - rect.top - before.y * view.scale;
+
+        applyFlowTransform();
+      }, { passive: false });
+
+      zoomInBtn.addEventListener("click", () => {
+        view.scale = Math.min(2.2, view.scale * 1.15);
+        applyFlowTransform();
+      });
+
+      zoomOutBtn.addEventListener("click", () => {
+        view.scale = Math.max(0.35, view.scale / 1.15);
+        applyFlowTransform();
+      });
+
+      resetViewBtn.addEventListener("click", () => {
+        view = { x: 40, y: 40, scale: 1 };
+        applyFlowTransform();
+      });
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function showSequencePage() {
+      mainHeader.classList.add("hidden");
+      controlPage.classList.add("hidden");
+      sequencePage.classList.remove("hidden");
+
+      renderSavedPositions();
+      renderSavedSequences();
+      renderFlow();
+      applyFlowTransform();
+    }
+
+    function showControlPage() {
+      sequencePage.classList.add("hidden");
+      mainHeader.classList.remove("hidden");
+      controlPage.classList.remove("hidden");
+    }
+
+    function createServoCard(servo) {
+      const maxAngle = servo.maxAngle ?? 180;
+      const initialAngle = clampServoAngle(servo.id, servo.initialAngle);
+      const initialPercent = angleToPercent(initialAngle, maxAngle);
+
+      const card = document.createElement("article");
+      card.className = "servo-card";
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="servo-number">${servo.id}</div>
+          <div class="card-title">
+            <h2>${servo.title}</h2>
+            <p>${servo.subtitle}</p>
+          </div>
+        </div>
+
+        <div class="image-wrap">
+          <img class="servo-img" src="${servo.image}" alt="${servo.title}">
+        </div>
+
+        <div class="value-badge" id="badge-${servo.id}">${initialPercent}%</div>
+
+        <input class="slider" id="slider-${servo.id}" type="range" min="0" max="${maxAngle}" value="${initialAngle}">
+
+        <div class="range-labels">
+          <span>0°</span>
+          <span>${maxAngle}°</span>
+        </div>
+
+        <div class="angle-row">
+          <button class="angle-btn" id="minus-${servo.id}" type="button">−</button>
+          <div class="angle" id="angle-${servo.id}">Angolo: ${initialAngle}°</div>
+          <button class="angle-btn" id="plus-${servo.id}" type="button">+</button>
+        </div>
+      `;
+
+      const slider = card.querySelector(`#slider-${servo.id}`);
+      const badge = card.querySelector(`#badge-${servo.id}`);
+      const angleText = card.querySelector(`#angle-${servo.id}`);
+      const minusBtn = card.querySelector(`#minus-${servo.id}`);
+      const plusBtn = card.querySelector(`#plus-${servo.id}`);
+
+      updateSliderBackground(slider);
+
+      slider.addEventListener("input", () => {
+        const angle = clampServoAngle(servo.id, slider.value);
+        const percent = angleToPercent(angle, maxAngle);
+
+        badge.textContent = `${percent}%`;
+        angleText.textContent = `Angolo: ${angle}°`;
+
+        updateSliderBackground(slider);
+      });
+
+      slider.addEventListener("change", sendCurrentPose);
+
+      minusBtn.addEventListener("click", () => {
+        changeServoAngleBy(servo.id, -1);
+      });
+
+      plusBtn.addEventListener("click", () => {
+        changeServoAngleBy(servo.id, 1);
+      });
+
+      return card;
+    }
+
+    function renderCards() {
+      cardsGrid.innerHTML = "";
+      servos.forEach((servo) => cardsGrid.appendChild(createServoCard(servo)));
+    }
+
+    async function connectArduino() {
+      if (!("serial" in navigator)) {
+        showAlert("Il browser non supporta la Web Serial API. Usa Chrome o Edge su desktop.", "Browser non supportato");
+        return;
+      }
+
+      try {
+        port = await navigator.serial.requestPort();
+        await port.open({ baudRate: 9600 });
+
+        writer = port.writable.getWriter();
+
+        startSerialReading();
+
+        simulationMode = false;
+        updateModeUI();
+
+        connectBtn.textContent = "Arduino connesso";
+        connectBtn.disabled = true;
+
+        await sendSpeedDelay();
+        await sendCurrentPose();
+      } catch (error) {
+        console.error(error);
+        showAlert("Connessione ad Arduino annullata o fallita.", "Connessione fallita");
+      }
+    }
+
+    function updateModeUI() {
+      modeToggleBtn.classList.toggle("status-simulation", simulationMode);
+      modeToggleBtn.classList.toggle("status-real", !simulationMode);
+      modeToggleText.textContent = simulationMode ? "Modalità: Simulazione" : "Modalità: Reale";
+    }
+
+    function openLogModal() {
+      logModal.classList.add("open");
+      const modalBox = document.getElementById("modalLogBox");
+      if (modalBox) modalBox.scrollTop = modalBox.scrollHeight;
+    }
+
+    function closeLogModal() {
+      logModal.classList.remove("open");
+    }
+
+    openLogBtn.addEventListener("click", (event) => {
+      if (event.target.closest(".clear-btn")) return;
+      openLogModal();
+    });
+
+    openSequenceLogBtn.addEventListener("click", (event) => {
+      if (event.target.closest(".clear-btn")) return;
+      openLogModal();
+    });
+
+    openLogBtn.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openLogModal();
+      }
+    });
+
+    openSequenceLogBtn.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        openLogModal();
+      }
+    });
+
+    closeLogModalBtn.addEventListener("click", closeLogModal);
+
+    logModal.addEventListener("mousedown", (event) => {
+      if (event.target === logModal) closeLogModal();
+    });
+
+    clearBigLogBtn.addEventListener("click", clearAllLogs);
+
+    modeToggleBtn.addEventListener("click", () => {
+      simulationMode = !simulationMode;
+      updateModeUI();
+    });
+
+    connectBtn.addEventListener("click", connectArduino);
+    clearLogBtn.addEventListener("click", clearAllLogs);
+    clearSequenceLogBtn.addEventListener("click", clearAllLogs);
+    homeBtn.addEventListener("click", moveToHomePosition);
+    savePositionBtn.addEventListener("click", saveCurrentPosition);
+    sequenceViewBtn.addEventListener("click", showSequencePage);
+    backToControlBtn.addEventListener("click", showControlPage);
+    clearSequenceBtn.addEventListener("click", clearFlow);
+    saveSequenceBtn.addEventListener("click", saveCurrentSequence);
+    runSequenceBtn.addEventListener("click", runSequence);
+
+    speedSlider.addEventListener("input", () => {
+      const sliderValue = Number(speedSlider.value);
+      speedDelay = speedSliderToDelay(sliderValue);
+      speedValue.textContent = `${sliderValue}%`;
+      speedDelayValue.textContent = `speedDelay: ${speedDelay}`;
+      updateSpeedSliderBackground();
+    });
+
+    speedSlider.addEventListener("change", sendSpeedDelay);
+
+    sequenceBadgePreview.addEventListener("click", openStylePicker);
+    styleCancelBtn.addEventListener("click", closeStylePicker);
+    styleConfirmBtn.addEventListener("click", applyStylePicker);
+    stylePickerModal.addEventListener("mousedown", (event) => {
+      if (event.target === stylePickerModal) closeStylePicker();
+    });
+    updateSequenceStylePreview();
+
+    renderCards();
+    renderSavedPositions();
+    renderSavedSequences();
+    setupFlowInteractions();
+    setupFlowFullscreen();
+    updateModeUI();
+    updateSpeedSliderBackground();
+    applyFlowTransform();
+  </script>
+</body>
+
+
+</html><!-- layout compact override injected -->
+<style>
+  /* ===== CONTROL PAGE COMPACT LAYOUT OVERRIDE ===== */
+  #mainHeader {
+    height: 86px !important;
+    padding: 0 28px !important;
+  }
+
+  #mainHeader .brand {
+    gap: 22px !important;
+  }
+
+  #mainHeader .brand-logo {
+    width: 76px !important;
+    height: 72px !important;
+  }
+
+  #mainHeader .brand-logo img {
+    width: 72px !important;
+    height: 72px !important;
+  }
+
+  #mainHeader .brand h1 {
+    font-size: 48px !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.018em !important;
+  }
+
+  #mainHeader .top-actions {
+    gap: 10px !important;
+  }
+
+  #mainHeader .product-pill,
+  #mainHeader .connect-btn,
+  #mainHeader .status-toggle,
+  #mainHeader .info-button {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    padding: 0 14px !important;
+  }
+
+  #mainHeader .status-toggle .status-dot {
+    width: 9px !important;
+    height: 9px !important;
+  }
+
+  #controlPage {
+    grid-template-columns: minmax(0, 1fr) 340px !important;
+    gap: 18px !important;
+    padding: 18px 30px 20px !important;
+  }
+
+  #controlPage .cards-grid {
+    aspect-ratio: 3 / 2;
+    height: auto !important;
+    max-height: calc(100vh - 124px);
+    align-self: start;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(2, minmax(0, 1fr)) !important;
+    gap: 16px !important;
+  }
+
+  #controlPage .servo-card {
+    aspect-ratio: 1 / 1;
+    padding: 14px 16px 12px !important;
+  }
+
+  #controlPage .card-header {
+    margin-bottom: 6px !important;
+    gap: 10px !important;
+  }
+
+  #controlPage .servo-number {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 8px !important;
+    font-size: 14px !important;
+  }
+
+  #controlPage .card-title h2 {
+    font-size: 15px !important;
+  }
+
+  #controlPage .card-title p {
+    font-size: 12px !important;
+    margin-top: 2px !important;
+  }
+
+  #controlPage .image-wrap {
+    margin: 2px 0 8px !important;
+  }
+
+  #controlPage .servo-img {
+    max-height: 132px !important;
+  }
+
+  #controlPage .value-badge {
+    padding: 6px 14px !important;
+    min-width: 66px !important;
+    margin-bottom: 7px !important;
+  }
+
+  #controlPage .slider {
+    margin: 4px 0 7px !important;
+  }
+
+  #controlPage .range-labels {
+    margin-bottom: 4px !important;
+  }
+
+  #controlPage .angle-row {
+    grid-template-columns: 40px 1fr 40px !important;
+  }
+
+  #controlPage .angle-btn {
+    padding: 6px 0 !important;
+  }
+
+  #controlPage .control-panel {
+    width: 100% !important;
+    height: auto !important;
+    max-height: calc(100vh - 124px);
+    align-self: start;
+    border-radius: 18px !important;
+    padding: 16px !important;
+  }
+
+  #controlPage .panel-title {
+    font-size: 20px !important;
+    margin-bottom: 12px !important;
+  }
+
+  #controlPage .home-btn {
+    padding: 12px 14px !important;
+  }
+
+  #controlPage .home-btn.save-action,
+  #controlPage .home-btn.sequence-action {
+    margin-top: 9px !important;
+  }
+
+  #controlPage .speed-control {
+    margin-top: 12px !important;
+    padding: 13px !important;
+  }
+
+  #controlPage .serial-log-card {
+    margin-top: 12px !important;
+    padding: 11px !important;
+  }
+
+  #controlPage .serial-log-preview {
+    min-height: 120px !important;
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader {
+      height: 78px !important;
+      padding: 0 18px !important;
+    }
+
+    #mainHeader .brand-logo,
+    #mainHeader .brand-logo img {
+      width: 62px !important;
+      height: 62px !important;
+    }
+
+    #mainHeader .brand h1 {
+      font-size: 40px !important;
+    }
+
+    #controlPage {
+      grid-template-columns: minmax(0, 1fr) 300px !important;
+      gap: 14px !important;
+      padding: 14px !important;
+    }
+  }
+
+
+  /* ===== CONTROL PANEL REFINEMENT + RESTORED LOGO ANIMATION ===== */
+  #mainHeader .brand-logo img {
+    transform: scale(2.7) rotate(0deg);
+  }
+
+  #mainHeader .brand-logo:hover img,
+  #mainHeader .brand-logo:focus-visible img {
+    animation: gearSmoothAccelerateShrink 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmoothIn 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::after,
+  #mainHeader .brand-logo:focus-visible::after {
+    animation: infoLetterSmoothIn 1.20s linear forwards !important;
+  }
+
+  #controlPage .control-panel {
+    max-height: none !important;
+    height: fit-content !important;
+    min-height: 0 !important;
+    padding: 15px !important;
+    border-radius: 17px !important;
+  }
+
+  #controlPage .panel-title {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    width: fit-content;
+    font-size: 18px !important;
+    line-height: 1.1 !important;
+    font-weight: 850 !important;
+    letter-spacing: -0.025em !important;
+    margin: 0 0 13px !important;
+    color: #f8fafc !important;
+  }
+
+  #controlPage .panel-title::before {
+    content: "";
+    width: 8px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--blue);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.16);
+    flex-shrink: 0;
+  }
+
+  #controlPage .home-btn {
+    padding: 11px 14px !important;
+    border-radius: 11px !important;
+    font-size: 13px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  #controlPage .speed-control {
+    margin-top: 12px !important;
+    padding: 12px !important;
+    border-radius: 13px !important;
+  }
+
+  #controlPage .speed-header {
+    font-size: 13px !important;
+    margin-bottom: 9px !important;
+  }
+
+  #controlPage .speed-delay {
+    margin-top: 7px !important;
+  }
+
+  #controlPage .serial-log-card {
+    flex: 0 0 auto !important;
+    margin-top: 12px !important;
+    padding: 12px !important;
+    border-radius: 13px !important;
+  }
+
+  #controlPage .serial-log-card .log-header {
+    margin-bottom: 9px !important;
+  }
+
+  #controlPage .log-title {
+    font-size: 14px !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  #controlPage .clear-btn {
+    padding: 6px 9px !important;
+    border-radius: 9px !important;
+    font-size: 11px !important;
+  }
+
+  #controlPage .serial-log-preview {
+    height: 118px !important;
+    min-height: 118px !important;
+    max-height: 118px !important;
+    border-radius: 11px !important;
+  }
+
+  #controlPage .serial-log-card .log-footer {
+    margin-top: 8px !important;
+    font-size: 10.5px !important;
+    line-height: 1.25 !important;
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader .brand-logo img {
+      transform: scale(2.55) rotate(0deg);
+    }
+
+    #controlPage .serial-log-preview {
+      height: 100px !important;
+      min-height: 100px !important;
+      max-height: 100px !important;
+    }
+  }
+
+  </style>
+
+
+<!-- fix log seriale: occupa tutto lo spazio restante del pannello -->
+<style>
+  /* ===== SERIAL LOG FULL HEIGHT FIX =====
+     Il pannello destro resta alto quanto la griglia dei servo.
+     Il log seriale prende tutto lo spazio rimasto, quindi non resta vuoto sotto. */
+
+  #controlPage .control-panel {
+    height: 100% !important;
+    max-height: calc(100vh - 124px) !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-self: stretch !important;
+  }
+
+  #controlPage .serial-log-card {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 0 !important;
+  }
+
+  #controlPage .serial-log-preview {
+    flex: 1 1 auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  #controlPage .serial-log-card .log-footer {
+    flex: 0 0 auto !important;
+    margin-bottom: 0 !important;
+  }
+
+  @media (max-width: 1200px) {
+    #controlPage .control-panel {
+      max-height: calc(100vh - 106px) !important;
+    }
+
+    #controlPage .serial-log-preview {
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+    }
+  }
+</style>
+
+
+<!-- final alignment fix: pannello destro alto come la griglia servo -->
+<style>
+  /* ===== EXACT RIGHT PANEL / SERVO GRID ALIGNMENT =====
+     La griglia servo ha aspect-ratio 3/2.
+     Il pannello destro usa la stessa altezza calcolata dalla larghezza reale della zona sinistra.
+     Così il bordo inferiore del pannello nero coincide con il bordo inferiore delle card. */
+
+  #controlPage {
+    align-items: start !important;
+  }
+
+  #controlPage .cards-grid {
+    height: min(calc(100vh - 124px), calc((100vw - 60px - 18px - 340px) * 2 / 3)) !important;
+    max-height: min(calc(100vh - 124px), calc((100vw - 60px - 18px - 340px) * 2 / 3)) !important;
+  }
+
+  #controlPage .control-panel {
+    height: min(calc(100vh - 124px), calc((100vw - 60px - 18px - 340px) * 2 / 3)) !important;
+    max-height: min(calc(100vh - 124px), calc((100vw - 60px - 18px - 340px) * 2 / 3)) !important;
+    align-self: start !important;
+    padding: 15px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #controlPage .serial-log-card {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    margin-top: 12px !important;
+    margin-bottom: 0 !important;
+    padding: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #controlPage .serial-log-preview {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  #controlPage .serial-log-card .log-footer {
+    flex: 0 0 auto !important;
+    margin: 8px 0 0 !important;
+  }
+
+  @media (max-width: 1200px) {
+    #controlPage .cards-grid {
+      height: min(calc(100vh - 106px), calc((100vw - 28px - 14px - 300px) * 2 / 3)) !important;
+      max-height: min(calc(100vh - 106px), calc((100vw - 28px - 14px - 300px) * 2 / 3)) !important;
+    }
+
+    #controlPage .control-panel {
+      height: min(calc(100vh - 106px), calc((100vw - 28px - 14px - 300px) * 2 / 3)) !important;
+      max-height: min(calc(100vh - 106px), calc((100vw - 28px - 14px - 300px) * 2 / 3)) !important;
+    }
+  }
+</style>
+
+
+<!-- fix finale: niente alone grigio, pannello allineato via altezza reale, ingranaggio -10% -->
+<style>
+  /* Annulla il calcolo precedente che deformava/forzava la griglia e generava l'alone grigio. */
+  #controlPage {
+    align-items: start !important;
+  }
+
+  #controlPage .cards-grid {
+    height: auto !important;
+    max-height: calc(100vh - 124px) !important;
+    aspect-ratio: 3 / 2 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    overflow: visible !important;
+  }
+
+  #controlPage .servo-card {
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  /* Il pannello destro prende esattamente l'altezza reale della griglia misurata dal browser. */
+  #controlPage .control-panel {
+    height: var(--servo-grid-height, auto) !important;
+    max-height: var(--servo-grid-height, none) !important;
+    align-self: start !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #controlPage .serial-log-card {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+  }
+
+  #controlPage .serial-log-preview {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+
+  /* Ingranaggio ridotto del 10%. */
+  #mainHeader .brand-logo img {
+    transform: scale(2.43) rotate(0deg) !important;
+  }
+
+  @media (max-width: 1200px) {
+    #controlPage .cards-grid {
+      max-height: calc(100vh - 106px) !important;
+    }
+
+    #mainHeader .brand-logo img {
+      transform: scale(2.295) rotate(0deg) !important;
+    }
+  }
+
+  @keyframes gearSmoothAccelerateShrink {
+    0% { opacity: 1; filter: blur(0); transform: scale(2.43) rotate(0deg); }
+    12% { opacity: 1; filter: blur(0); transform: scale(2.394) rotate(18deg); }
+    24% { opacity: 1; filter: blur(0); transform: scale(2.295) rotate(58deg); }
+    36% { opacity: 1; filter: blur(0); transform: scale(2.106) rotate(126deg); }
+    48% { opacity: 0.98; filter: blur(0); transform: scale(1.818) rotate(230deg); }
+    60% { opacity: 0.9; filter: blur(0.12px); transform: scale(1.422) rotate(335deg); }
+    72% { opacity: 0.68; filter: blur(0.28px); transform: scale(0.972) rotate(565deg); }
+    84% { opacity: 0.34; filter: blur(0.55px); transform: scale(0.576) rotate(880deg); }
+    100% { opacity: 0; filter: blur(1px); transform: scale(0.342) rotate(1280deg); }
+  }
+</style>
+
+<script>
+  (function syncRightPanelToServoGrid() {
+    const root = document.getElementById("controlPage");
+    const grid = document.getElementById("cardsGrid");
+    if (!root || !grid) return;
+
+    function updateHeight() {
+      const height = grid.getBoundingClientRect().height;
+      if (height > 0) {
+        root.style.setProperty("--servo-grid-height", `${Math.round(height)}px`);
+      }
+    }
+
+    requestAnimationFrame(updateHeight);
+    window.addEventListener("resize", updateHeight);
+
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(updateHeight).observe(grid);
+    }
+  })();
+</script>
+
+
+<!-- fix logo finale: ingranaggio -15%, titolo più vicino, animazione ripristinata -->
+<style>
+  /* Avvicina il testo Paio-robotics all'ingranaggio. */
+  #mainHeader .brand {
+    gap: 14px !important;
+  }
+
+  /* Riduzione ulteriore del 15% rispetto alla versione precedente: 2.43 -> 2.0655.
+     La trasformazione usa variabili animate, così l'animazione non viene bloccata dai vecchi !important. */
+  #mainHeader .brand-logo img {
+    --gear-scale: 2.0655;
+    --gear-rotate: 0deg;
+    transform: scale(var(--gear-scale)) rotate(var(--gear-rotate)) !important;
+    transform-origin: center !important;
+    opacity: 1;
+    filter: none;
+    animation: none !important;
+    will-change: transform, opacity, filter;
+  }
+
+  #mainHeader .brand-logo:hover img,
+  #mainHeader .brand-logo:focus-visible img {
+    animation: gearFinalAccelerateShrink 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmoothIn 1.20s linear forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::after,
+  #mainHeader .brand-logo:focus-visible::after {
+    animation: infoLetterSmoothIn 1.20s linear forwards !important;
+  }
+
+  @keyframes gearFinalAccelerateShrink {
+    0% {
+      --gear-scale: 2.0655;
+      --gear-rotate: 0deg;
+      opacity: 1;
+      filter: blur(0);
+    }
+    12% {
+      --gear-scale: 2.035;
+      --gear-rotate: 18deg;
+      opacity: 1;
+      filter: blur(0);
+    }
+    24% {
+      --gear-scale: 1.951;
+      --gear-rotate: 58deg;
+      opacity: 1;
+      filter: blur(0);
+    }
+    36% {
+      --gear-scale: 1.790;
+      --gear-rotate: 126deg;
+      opacity: 1;
+      filter: blur(0);
+    }
+    48% {
+      --gear-scale: 1.545;
+      --gear-rotate: 230deg;
+      opacity: 0.98;
+      filter: blur(0);
+    }
+    60% {
+      --gear-scale: 1.209;
+      --gear-rotate: 335deg;
+      opacity: 0.9;
+      filter: blur(0.12px);
+    }
+    72% {
+      --gear-scale: 0.826;
+      --gear-rotate: 565deg;
+      opacity: 0.68;
+      filter: blur(0.28px);
+    }
+    84% {
+      --gear-scale: 0.490;
+      --gear-rotate: 880deg;
+      opacity: 0.34;
+      filter: blur(0.55px);
+    }
+    100% {
+      --gear-scale: 0.291;
+      --gear-rotate: 1280deg;
+      opacity: 0;
+      filter: blur(1px);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader .brand {
+      gap: 12px !important;
+    }
+
+    #mainHeader .brand-logo img {
+      --gear-scale: 1.951;
+      --gear-rotate: 0deg;
+    }
+  }
+</style>
+
+
+<!-- fix logo: ingranaggio -15%, testo più vicino, animazione fluida con proprietà CSS registrate, i più piccola -->
+<style>
+  @property --gear-scale {
+    syntax: "<number>";
+    inherits: false;
+    initial-value: 1.7557;
+  }
+
+  @property --gear-rotate {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  #mainHeader .brand {
+    gap: 8px !important;
+  }
+
+  #mainHeader .brand-logo {
+    width: 68px !important;
+  }
+
+  #mainHeader .brand-logo img {
+    --gear-scale: 1.7557;
+    --gear-rotate: 0deg;
+    transform: scale(var(--gear-scale)) rotate(var(--gear-rotate)) !important;
+    transform-origin: 50% 50% !important;
+    opacity: 1 !important;
+    filter: none !important;
+    animation: none !important;
+    will-change: transform, opacity, filter;
+    backface-visibility: hidden;
+  }
+
+  #mainHeader .brand-logo::after {
+    font-size: 30px !important;
+    line-height: 1 !important;
+    font-weight: 950 !important;
+  }
+
+  #mainHeader .brand-logo:hover img,
+  #mainHeader .brand-logo:focus-visible img {
+    animation: gearFluidAccelerateShrink 1.18s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmoothIn 1.18s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::after,
+  #mainHeader .brand-logo:focus-visible::after {
+    animation: infoLetterSmallSmoothIn 1.18s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  @keyframes gearFluidAccelerateShrink {
+    0%   { --gear-scale: 1.7557; --gear-rotate: 0deg;    opacity: 1;    filter: blur(0); }
+    8%   { --gear-scale: 1.7480; --gear-rotate: 10deg;   opacity: 1;    filter: blur(0); }
+    16%  { --gear-scale: 1.7250; --gear-rotate: 30deg;   opacity: 1;    filter: blur(0); }
+    24%  { --gear-scale: 1.6850; --gear-rotate: 66deg;   opacity: 1;    filter: blur(0); }
+    32%  { --gear-scale: 1.6200; --gear-rotate: 122deg;  opacity: 1;    filter: blur(0); }
+    40%  { --gear-scale: 1.5200; --gear-rotate: 205deg;  opacity: 0.99; filter: blur(0); }
+    50%  { --gear-scale: 1.3550; --gear-rotate: 340deg;  opacity: 0.94; filter: blur(0.08px); }
+    60%  { --gear-scale: 1.1300; --gear-rotate: 535deg;  opacity: 0.82; filter: blur(0.18px); }
+    70%  { --gear-scale: 0.8600; --gear-rotate: 785deg;  opacity: 0.62; filter: blur(0.32px); }
+    80%  { --gear-scale: 0.6000; --gear-rotate: 1055deg; opacity: 0.38; filter: blur(0.52px); }
+    90%  { --gear-scale: 0.3900; --gear-rotate: 1245deg; opacity: 0.16; filter: blur(0.78px); }
+    100% { --gear-scale: 0.2500; --gear-rotate: 1360deg; opacity: 0;    filter: blur(1px); }
+  }
+
+  @keyframes infoLetterSmallSmoothIn {
+    0%, 66% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.18) rotate(0deg);
+    }
+    78% {
+      opacity: 0.24;
+      transform: translate(-50%, -50%) scale(0.54) rotate(220deg);
+    }
+    90% {
+      opacity: 0.78;
+      transform: translate(-50%, -50%) scale(0.88) rotate(500deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(720deg);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader .brand {
+      gap: 7px !important;
+    }
+
+    #mainHeader .brand-logo {
+      width: 60px !important;
+    }
+
+    #mainHeader .brand-logo img {
+      --gear-scale: 1.6584;
+      --gear-rotate: 0deg;
+    }
+
+    #mainHeader .brand-logo::after {
+      font-size: 28px !important;
+    }
+  }
+</style>
+
+<!-- fix: cerchio intorno alla i più piccolo -->
+<style>
+  #mainHeader .brand-logo::before {
+    width: 46px !important;
+    height: 46px !important;
+    border-radius: 999px !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmallSmoothIn 1.18s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  @keyframes infoCircleSmallSmoothIn {
+    0%, 62% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.18) rotate(0deg);
+    }
+    74% {
+      opacity: 0.18;
+      transform: translate(-50%, -50%) scale(0.46) rotate(180deg);
+    }
+    86% {
+      opacity: 0.72;
+      transform: translate(-50%, -50%) scale(0.82) rotate(420deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1) rotate(720deg);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    #mainHeader .brand-logo::before {
+      width: 42px !important;
+      height: 42px !important;
+    }
+  }
+</style>
+
+<!-- tweak: animazione ingranaggio leggermente più veloce -->
+<style>
+  #mainHeader .brand-logo:hover img,
+  #mainHeader .brand-logo:focus-visible img {
+    animation: gearFluidAccelerateShrink 0.92s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::before,
+  #mainHeader .brand-logo:focus-visible::before {
+    animation: infoCircleSmallSmoothIn 0.92s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+
+  #mainHeader .brand-logo:hover::after,
+  #mainHeader .brand-logo:focus-visible::after {
+    animation: infoLetterSmallSmoothIn 0.92s cubic-bezier(.22,.02,.10,1) forwards !important;
+  }
+</style>
+
+
+<style>
+  /* ===== PENCIL EDIT ICONS FOR POSITIONS, SEQUENCES AND FLOW NODES ===== */
+  .position-block,
+  .saved-sequence-block {
+    position: relative !important;
+  }
+
+  .flow-world > .flow-node {
+    position: absolute !important;
+  }
+
+  .position-drag-floater,
+  .flow-trash-anim {
+    position: fixed !important;
+  }
+
+  .position-edit-icon,
+  .sequence-edit-icon,
+  .node-edit-icon {
+    border: none !important;
+    display: grid !important;
+    place-items: center !important;
+    cursor: pointer !important;
+    color: white !important;
+    background: rgba(15, 23, 42, 0.20) !important;
+    backdrop-filter: blur(6px) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18) !important;
+    transition: transform 0.16s ease, background 0.16s ease, box-shadow 0.16s ease !important;
+    z-index: 20 !important;
+  }
+
+  .position-edit-icon,
+  .sequence-edit-icon {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+  }
+
+  .node-edit-icon {
+    position: absolute !important;
+    top: -12px !important;
+    right: -12px !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 999px !important;
+    background: rgba(15, 23, 42, 0.88) !important;
+    border: 1px solid rgba(147, 197, 253, 0.45) !important;
+  }
+
+  .position-edit-icon:hover,
+  .sequence-edit-icon:hover,
+  .node-edit-icon:hover {
+    transform: translateY(-1px) scale(1.06) !important;
+    background: var(--blue) !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.32) !important;
+  }
+
+  .position-edit-icon svg,
+  .sequence-edit-icon svg,
+  .node-edit-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke: currentColor !important;
+    fill: none !important;
+    stroke-width: 2.4 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    pointer-events: none !important;
+  }
+
+  .position-block strong,
+  .position-meta {
+    padding-right: 42px !important;
+  }
+
+  .saved-sequence-title {
+    padding-right: 42px !important;
+  }
+
+  .position-actions,
+  .saved-sequence-actions {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .flow-node {
+    padding-right: 32px !important;
+  }
+</style>
+
+
+<!-- ===== FIX: ACTION BUTTONS + FLOW ARROWS/PENCIL HITBOX ===== -->
+<style>
+  /* Pulsanti Esegui / Elimina più ordinati dopo la rimozione di Modifica */
+  .position-actions,
+  .saved-sequence-actions {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .position-run-btn,
+  .position-delete-btn,
+  .run-saved-sequence-btn,
+  .delete-sequence-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    border-radius: 11px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 14px !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .saved-sequence-actions .sequence-edit-icon,
+  .position-actions .position-edit-icon {
+    display: none !important;
+  }
+
+  /* La matita resta cliccabile ma non interferisce con i punti delle frecce */
+  .node-edit-icon {
+    top: -18px !important;
+    right: -18px !important;
+    width: 30px !important;
+    height: 30px !important;
+    z-index: 24 !important;
+  }
+
+  .flow-node {
+    overflow: visible !important;
+    padding-right: 34px !important;
+  }
+
+  .node-port {
+    width: 18px !important;
+    height: 18px !important;
+    border-width: 4px !important;
+    z-index: 35 !important;
+    pointer-events: auto !important;
+    transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease, border-color 0.14s ease !important;
+  }
+
+  .node-port.input {
+    left: -9px !important;
+  }
+
+  .node-port.output {
+    right: -9px !important;
+  }
+
+  .node-port::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 38px;
+    height: 38px;
+    transform: translate(-50%, -50%);
+    border-radius: 999px;
+  }
+
+  .node-port:hover,
+  .node-port.active {
+    transform: translateY(-50%) scale(1.18) !important;
+    background: #ffffff !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 0 0 7px rgba(56, 189, 248, 0.18) !important;
+  }
+
+  .node-port.output.active {
+    border-color: #facc15 !important;
+    box-shadow: 0 0 0 7px rgba(250, 204, 21, 0.22) !important;
+  }
+
+  .flow-svg {
+    z-index: 2 !important;
+  }
+
+  .flow-node {
+    z-index: 4 !important;
+  }
+
+  .edge-path {
+    stroke-width: 3.5px !important;
+    filter: drop-shadow(0 0 5px rgba(147, 197, 253, 0.18));
+  }
+
+  .edge-delay-input {
+    z-index: 6 !important;
+  }
+</style>
+
+
+<!-- ===== FIX FRECCE + SCHERMO GRANDE FOGLIO CENTRALE ===== -->
+<style>
+  .flow-card {
+    position: relative !important;
+  }
+
+  .flow-fullscreen-btn {
+    position: absolute;
+    right: 18px;
+    bottom: 18px;
+    z-index: 80;
+    width: 46px;
+    height: 46px;
+    border-radius: 16px;
+    border: 1px solid rgba(147, 197, 253, 0.42);
+    background: rgba(15, 23, 42, 0.86);
+    color: #dbeafe;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.26);
+    backdrop-filter: blur(8px);
+  }
+
+  .flow-fullscreen-btn:hover {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+    transform: translateY(-1px) scale(1.03);
+  }
+
+  .flow-fullscreen-btn svg {
+    width: 23px;
+    height: 23px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  body.flow-fullscreen-open {
+    overflow: hidden !important;
+  }
+
+  body.flow-fullscreen-open .sequence-page {
+    display: block !important;
+    padding: 0 !important;
+  }
+
+  body.flow-fullscreen-open .sequence-page > .sequence-back-btn,
+  body.flow-fullscreen-open .sequence-page > .left-card,
+  body.flow-fullscreen-open .sequence-page > .right-panel {
+    display: none !important;
+  }
+
+  body.flow-fullscreen-open .flow-card {
+    position: fixed !important;
+    inset: 16px !important;
+    width: auto !important;
+    height: auto !important;
+    z-index: 3000 !important;
+    border-radius: 22px !important;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.42) !important;
+  }
+
+  body.flow-fullscreen-open .flow-fullscreen-btn {
+    right: 22px;
+    bottom: 22px;
+  }
+
+  .edge-preview-path {
+    stroke: #bfdbfe !important;
+    stroke-width: 3.5px !important;
+    stroke-dasharray: 8 8;
+    fill: none;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px rgba(147, 197, 253, 0.25));
+  }
+
+  .node-port.connecting-target {
+    background: #ffffff !important;
+    border-color: #22c55e !important;
+    box-shadow: 0 0 0 9px rgba(34, 197, 94, 0.22) !important;
+    transform: translateY(-50%) scale(1.24) !important;
+  }
+
+  .node-port.output.active {
+    background: #ffffff !important;
+    border-color: #facc15 !important;
+  }
+</style>
+
+
+<!-- ===== FIX DEFINITIVO FRECCE: ancoraggio reale ai pallini + punta non sovrapposta ===== -->
+<style>
+  .flow-svg {
+    z-index: 2 !important;
+    pointer-events: none !important;
+  }
+
+  .flow-node {
+    z-index: 4 !important;
+  }
+
+  .node-port {
+    z-index: 40 !important;
+  }
+
+  .edge-path {
+    stroke: #93c5fd !important;
+    stroke-width: 3.4px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    fill: none !important;
+    filter: drop-shadow(0 0 4px rgba(147, 197, 253, 0.18));
+  }
+
+  .edge-preview-path {
+    stroke: #bfdbfe !important;
+    stroke-width: 3.4px !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    stroke-dasharray: 8 7 !important;
+    fill: none !important;
+    pointer-events: none !important;
+  }
+</style>
+
+<script>
+(function fixFlowArrowAnchors() {
+  function getWorldPointFromElementCenter(element) {
+    const world = document.getElementById("flowWorld");
+    if (!element || !world) return { x: 0, y: 0 };
+
+    const worldRect = world.getBoundingClientRect();
+    const rect = element.getBoundingClientRect();
+    const scale = window.view?.scale || (typeof view !== "undefined" ? view.scale : 1) || 1;
+
+    return {
+      x: (rect.left + rect.width / 2 - worldRect.left) / scale,
+      y: (rect.top + rect.height / 2 - worldRect.top) / scale
+    };
+  }
+
+  function getNodePortPoint(node, side) {
+    const element = document.querySelector(`[data-node-id="${node.id}"]`);
+    if (!element) {
+      const fallbackWidth = 160;
+      const fallbackHeight = 54;
+      return side === "right"
+        ? { x: node.x + fallbackWidth, y: node.y + fallbackHeight / 2 }
+        : { x: node.x, y: node.y + fallbackHeight / 2 };
+    }
+
+    const port = element.querySelector(side === "right" ? ".node-port.output" : ".node-port.input");
+    if (port) return getWorldPointFromElementCenter(port);
+
+    return side === "right"
+      ? { x: node.x + element.offsetWidth, y: node.y + element.offsetHeight / 2 }
+      : { x: node.x, y: node.y + element.offsetHeight / 2 };
+  }
+
+  function shortenLine(start, end, startPad = 10, endPad = 16) {
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const ux = dx / len;
+    const uy = dy / len;
+
+    return {
+      start: { x: start.x + ux * startPad, y: start.y + uy * startPad },
+      end: { x: end.x - ux * endPad, y: end.y - uy * endPad }
+    };
+  }
+
+  window.getNodePoint = function patchedGetNodePoint(node, side) {
+    return getNodePortPoint(node, side);
+  };
+
+  window.buildEdgePathD = function patchedBuildEdgePathD(rawStart, rawEnd) {
+    const { start, end } = shortenLine(rawStart, rawEnd, 9, 17);
+    const dx = end.x - start.x;
+    const dy = end.y - start.y;
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+
+    if (absDx < 4 && absDy < 4) {
+      return `M ${start.x} ${start.y} L ${end.x} ${end.y}`;
+    }
+
+    if (dx >= 0) {
+      const control = Math.max(56, Math.min(180, absDx * 0.5 + absDy * 0.25));
+      return `M ${start.x} ${start.y} C ${start.x + control} ${start.y}, ${end.x - control} ${end.y}, ${end.x} ${end.y}`;
+    }
+
+    const loop = Math.max(80, Math.min(180, Math.abs(dx) * 0.55 + absDy * 0.22));
+    const verticalBias = dy >= 0 ? 1 : -1;
+    const bow = Math.max(40, Math.min(110, absDy * 0.35 + 44));
+
+    return `M ${start.x} ${start.y} C ${start.x + loop} ${start.y + verticalBias * bow}, ${end.x - loop} ${end.y - verticalBias * bow}, ${end.x} ${end.y}`;
+  };
+
+  window.getEdgeLabelPosition = function patchedGetEdgeLabelPosition(start, end) {
+    return {
+      x: (start.x + end.x) / 2,
+      y: (start.y + end.y) / 2 - 26
+    };
+  };
+
+  function makeMarkerSmaller() {
+    const marker = document.getElementById("arrowHead");
+    if (!marker) return;
+    marker.setAttribute("markerWidth", "6");
+    marker.setAttribute("markerHeight", "6");
+    marker.setAttribute("refX", "5");
+    marker.setAttribute("refY", "2.5");
+    marker.setAttribute("orient", "auto");
+
+    const path = marker.querySelector("path");
+    if (path) {
+      path.setAttribute("d", "M0,0 L0,5 L5,2.5 z");
+      path.setAttribute("fill", "#93c5fd");
+    }
+  }
+
+  makeMarkerSmaller();
+  requestAnimationFrame(() => {
+    makeMarkerSmaller();
+    if (typeof renderEdges === "function") renderEdges();
+  });
+})();
+</script>
+
+<!-- fix: i loghi delle sequenze salvate rispecchiano esattamente il logo scelto nel foglio centrale -->
+<style>
+  .saved-sequence-block .saved-sequence-icon {
+    background: var(--sequence-color, var(--blue)) !important;
+    color: #ffffff !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 22px color-mix(in srgb, var(--sequence-color, var(--blue)) 30%, transparent) !important;
+  }
+
+  .saved-sequence-block .saved-sequence-icon svg {
+    stroke: currentColor !important;
+    fill: none !important;
+  }
+</style>
+
+<!-- tweak: viola solo su titolo e contenitore generale Sequenze salvate; card interne invariate -->
+<style>
+  .right-panel > .sequence-card:first-child {
+    border: 1px solid rgba(139, 92, 246, 0.28) !important;
+    box-shadow:
+      0 8px 22px rgba(15, 23, 42, 0.08),
+      0 0 0 1px rgba(139, 92, 246, 0.05) !important;
+    position: relative !important;
+  }
+
+  .right-panel > .sequence-card:first-child::before {
+    content: "";
+    position: absolute;
+    left: 18px;
+    right: 18px;
+    top: 0;
+    height: 4px;
+    border-radius: 0 0 999px 999px;
+    background: linear-gradient(90deg, rgba(139, 92, 246, 0), var(--purple), rgba(139, 92, 246, 0));
+    pointer-events: none;
+  }
+
+  .right-panel > .sequence-card:first-child h3 {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    color: #111827 !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    content: "";
+    width: 8px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--purple);
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.12);
+    flex-shrink: 0;
+  }
+
+  /* Le card salvate restano come nella versione precedente: niente viola su background, bordi o ombre interne. */
+  .saved-sequence-block {
+    border-color: #e2e8f0 !important;
+    background: linear-gradient(180deg, #ffffff, #f8fafc) !important;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  .saved-sequence-block::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  .sequence-edit-icon {
+    background: rgba(15, 23, 42, 0.20) !important;
+  }
+
+  .sequence-edit-icon:hover {
+    background: var(--blue) !important;
+    box-shadow: 0 10px 22px rgba(37, 99, 235, 0.32) !important;
+  }
+</style>
+
+
+<!-- fix: bordo viola pulito sul box Sequenze salvate, senza sfumature/sfocature -->
+<style>
+  .right-panel > .sequence-card:first-child {
+    border: 2px solid rgba(139, 92, 246, 0.42) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .right-panel > .sequence-card:first-child::before {
+    content: none !important;
+    display: none !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    box-shadow: none !important;
+  }
+</style>
+
+<!-- tweak: bordi generali più decisi per Sequenze salvate e Blocchi posizione -->
+<style>
+  /* Box generale Sequenze salvate: viola più deciso, senza sfumature. */
+  .right-panel > .sequence-card:first-child {
+    border: 3px solid rgba(139, 92, 246, 0.72) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3 {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    content: "" !important;
+    width: 9px !important;
+    height: 26px !important;
+    border-radius: 999px !important;
+    background: var(--purple) !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Box generale Blocchi posizione: stesso trattamento, ma giallo. */
+  .sequence-card.left-card {
+    border: 3px solid rgba(245, 158, 11, 0.78) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .sequence-card.left-card h3 {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .sequence-card.left-card h3::before {
+    content: "" !important;
+    width: 9px !important;
+    height: 26px !important;
+    border-radius: 999px !important;
+    background: var(--yellow) !important;
+    box-shadow: none !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Pulsante principale per salvare una posizione: giallo coerente con il box delle posizioni. */
+  #controlPage .home-btn.save-action {
+    background: var(--yellow) !important;
+    box-shadow: 0 8px 18px rgba(245, 158, 11, 0.24) !important;
+  }
+
+  #controlPage .home-btn.save-action:hover {
+    background: var(--yellow-dark) !important;
+  }
+</style>
+
+
+<!-- tweak: sostituisce il viola delle Sequenze salvate con un blu-ciano più coerente -->
+<style>
+  /* Box generale Sequenze salvate: colore più vicino alla palette tecnica della pagina.
+     Le card interne restano invariate. */
+  .right-panel > .sequence-card:first-child {
+    border: 3px solid rgba(0, 167, 181, 0.82) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    background: var(--arduino) !important;
+    box-shadow: none !important;
+  }
+
+  .right-panel > .sequence-card:first-child::before,
+  .right-panel > .sequence-card:first-child::after {
+    content: none !important;
+    display: none !important;
+  }
+</style>
+
+
+<!-- tweak: Sequenze salvate e pulsante Sequenze in blu primario -->
+<style>
+  /* Box generale Sequenze salvate: blu primario, più coerente con logo/frecce/interfaccia. */
+  .right-panel > .sequence-card:first-child {
+    border: 3px solid rgba(37, 99, 235, 0.82) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    background: var(--blue) !important;
+    box-shadow: none !important;
+  }
+
+  .right-panel > .sequence-card:first-child::before,
+  .right-panel > .sequence-card:first-child::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Pulsante Sequenze nella pagina principale: stesso blu del box Sequenze salvate. */
+  #controlPage .home-btn.sequence-action {
+    background: var(--blue) !important;
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25) !important;
+  }
+
+  #controlPage .home-btn.sequence-action:hover {
+    background: var(--blue-dark) !important;
+  }
+</style>
+
+
+<!-- tweak finale: Sequenze salvate in arancio, non blu/non giallo -->
+<style>
+  /* Box generale Sequenze salvate: arancio deciso, distinto dal blu principale e dal giallo delle posizioni. */
+  .right-panel > .sequence-card:first-child {
+    border: 3px solid rgba(249, 115, 22, 0.86) !important;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.08) !important;
+    background: #ffffff !important;
+  }
+
+  .right-panel > .sequence-card:first-child h3::before {
+    background: var(--orange) !important;
+    box-shadow: none !important;
+  }
+
+  .right-panel > .sequence-card:first-child::before,
+  .right-panel > .sequence-card:first-child::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  /* Pulsante Sequenze nella pagina principale: stesso arancio del box Sequenze salvate. */
+  #controlPage .home-btn.sequence-action {
+    background: var(--orange) !important;
+    box-shadow: 0 8px 18px rgba(249, 115, 22, 0.26) !important;
+  }
+
+  #controlPage .home-btn.sequence-action:hover {
+    background: #ea580c !important;
+  }
+</style>
+
+<!-- fix: riduce lo spazio vuoto sopra il titolo Blocchi posizione -->
+<style>
+  .sequence-card.left-card {
+    padding-top: 48px !important;
+  }
+
+  .sequence-card.left-card h3 {
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  .sequence-card.left-card .sequence-help {
+    margin-top: 0 !important;
+    margin-bottom: 18px !important;
+  }
+
+  .sequence-card.left-card .saved-positions {
+    padding-top: 0 !important;
+  }
+
+  @media (max-width: 1200px) {
+    .sequence-card.left-card {
+      padding-top: 44px !important;
+    }
+  }
+</style>
+
+<!-- fix: rimuove scrollbar visibile e compatta ancora il box Blocchi posizione -->
+<style>
+  /* Il box sinistro resta scrollabile, ma senza barra visibile. */
+  #sequencePage .left-card {
+    padding-top: 42px !important;
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+    border-color: #f59e0b !important;
+    border-width: 3px !important;
+  }
+
+  #sequencePage .left-card h3 {
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
+  }
+
+  #sequencePage .left-card .sequence-help {
+    margin: 0 0 12px !important;
+    line-height: 1.25 !important;
+  }
+
+  #sequencePage .left-card .saved-positions {
+    padding-right: 0 !important;
+    margin-right: 0 !important;
+    gap: 12px !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  #sequencePage .left-card .saved-positions::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  #sequencePage .left-card .position-block {
+    margin-right: 0 !important;
+  }
+
+  #sequencePage .sequence-back-btn {
+    left: 22px !important;
+    top: 18px !important;
+  }
+</style>
+
+<!-- fix: nasconde scrollbar anche nel box Sequenze salvate -->
+<style>
+  #savedSequences,
+  .saved-sequence-list,
+  .saved-sequences {
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  #savedSequences::-webkit-scrollbar,
+  .saved-sequence-list::-webkit-scrollbar,
+  .saved-sequences::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+</style>
+
+<!-- fix: titolo Blocchi posizione più alto e pulsante indietro riposizionato -->
+<style>
+  /* Compatta la testata del box Blocchi posizione. */
+  #sequencePage .sequence-card.left-card {
+    padding-top: 46px !important;
+  }
+
+  #sequencePage .sequence-card.left-card h3 {
+    margin-top: 0 !important;
+    margin-bottom: 8px !important;
+  }
+
+  #sequencePage .sequence-card.left-card .sequence-help {
+    margin-top: 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Sposta leggermente il pulsante indietro per non pesare sulla testata del box. */
+  #sequencePage .sequence-back-btn {
+    left: 18px !important;
+    top: 14px !important;
+  }
+</style>
+
+<!-- fix definitivo: allinea il titolo Blocchi posizione a Sequenze salvate -->
+<style>
+  #sequencePage .sequence-card.left-card {
+    padding-top: 18px !important;
+  }
+
+  #sequencePage .sequence-card.left-card h3 {
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  #sequencePage .sequence-card.left-card .sequence-help {
+    margin: 0 0 14px !important;
+    line-height: 1.25 !important;
+  }
+
+  #sequencePage .sequence-back-btn {
+    left: 14px !important;
+    top: 8px !important;
+    z-index: 80 !important;
+  }
+</style>
